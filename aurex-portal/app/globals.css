@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Hex values for non-Tailwind CSS usage */
+    --aurex-blue: #1e3a5f;
+    --aurex-blue-light: #2d5a8e;
+    --aurex-teal: #0d9488;
+    --aurex-accent: #3b82f6;
+
+    /* RGB components for Tailwind opacity modifiers (e.g. bg-aurex-teal/10) */
+    --color-aurex-blue: 30 58 95;
+    --color-aurex-blue-light: 45 90 142;
+    --color-aurex-teal: 13 148 136;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-aurex-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-aurex-blue-light focus:outline-none focus:ring-2 focus:ring-aurex-blue focus:ring-offset-2 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-aurex-blue bg-white px-6 py-3 text-sm font-semibold text-aurex-blue shadow-sm transition-all hover:bg-navy-50 focus:outline-none focus:ring-2 focus:ring-aurex-blue focus:ring-offset-2;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2;
+  }
+
+  .card {
+    @apply rounded-2xl border border-gray-100 bg-white p-6 shadow-sm;
+  }
+
+  .section-label {
+    @apply text-sm font-semibold uppercase tracking-widest text-aurex-teal;
+  }
+
+  .section-title {
+    @apply text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl;
+  }
+
+  .section-subtitle {
+    @apply mt-4 text-lg text-gray-600;
+  }
+
+  .input {
+    @apply block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition focus:border-aurex-blue focus:outline-none focus:ring-2 focus:ring-aurex-blue/20;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-gray-700;
+  }
+}
