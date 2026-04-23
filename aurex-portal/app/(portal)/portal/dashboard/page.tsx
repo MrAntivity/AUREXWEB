@@ -48,7 +48,7 @@ export default function DashboardPage() {
     {
       label: "Pending Approval",
       value: String(pendingCount),
-      sub: pendingCount === 1 ? "awaiting review" : "awaiting review",
+      sub: "awaiting review",
       icon: Clock,
       color: "bg-amber-50 text-amber-600",
       href: "/portal/approvals",
@@ -73,8 +73,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Welcome back{user ? `, ${user.name.split(" ")[0]}` : ""}. Here&apos;s what&apos;s happening.
         </p>
       </div>
@@ -84,15 +84,13 @@ export default function DashboardPage() {
         {stats.map((s) => {
           const inner = (
             <div key={s.label} className="card flex items-start gap-4 transition-shadow hover:shadow-md">
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${s.color}`}
-              >
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${s.color}`}>
                 <s.icon size={18} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">{s.label}</p>
-                <p className="mt-0.5 text-2xl font-bold text-gray-900">{s.value}</p>
-                <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400">{s.label}</p>
+                <p className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">{s.value}</p>
+                <p className="mt-1 flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
                   <TrendingUp size={11} />
                   {s.sub}
                 </p>
@@ -118,13 +116,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Budget alert */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-        <AlertCircle className="mt-0.5 shrink-0 text-amber-600" size={16} />
+      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-900/20">
+        <AlertCircle className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" size={16} />
         <div>
-          <p className="text-sm font-medium text-amber-800">
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
             Chemistry department is at 80% of monthly budget
           </p>
-          <p className="mt-0.5 text-xs text-amber-600">
+          <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
             $12,400 of $15,000 used. New requests over $500 require Super Admin approval.
           </p>
         </div>
@@ -133,7 +131,7 @@ export default function DashboardPage() {
       {/* Recent orders */}
       <div className="card">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">Recent Purchase Requests</h2>
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Purchase Requests</h2>
           <Link href="/portal/orders" className="text-xs font-medium text-aurex-blue hover:underline">
             View all
           </Link>
@@ -141,7 +139,7 @@ export default function DashboardPage() {
 
         {recentOrders.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <Package size={32} className="text-gray-200" />
+            <Package size={32} className="text-gray-200 dark:text-gray-700" />
             <p className="text-sm text-gray-400">No orders yet.</p>
             <Link
               href="/portal/catalog"
@@ -154,7 +152,7 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-gray-100 dark:border-white/8">
                   {["Request ID", "Items", "Total", "Status", "Date"].map((h) => (
                     <th key={h} className="pb-3 text-left text-xs font-semibold text-gray-400">
                       {h}
@@ -162,21 +160,19 @@ export default function DashboardPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                 {recentOrders.map((o) => (
-                  <tr key={o.id} className="hover:bg-gray-50/50">
-                    <td className="py-3 font-mono text-xs text-gray-500">{o.requestNumber}</td>
-                    <td className="max-w-[200px] truncate py-3 font-medium text-gray-900">
+                  <tr key={o.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5">
+                    <td className="py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{o.requestNumber}</td>
+                    <td className="max-w-[200px] truncate py-3 font-medium text-gray-900 dark:text-white">
                       {o.items[0]?.product.name}
                       {o.items.length > 1 && (
                         <span className="ml-1 text-gray-400">+{o.items.length - 1} more</span>
                       )}
                     </td>
-                    <td className="py-3 font-medium text-gray-900">${o.total.toFixed(2)}</td>
+                    <td className="py-3 font-medium text-gray-900 dark:text-white">${o.total.toFixed(2)}</td>
                     <td className="py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyle[o.status]}`}
-                      >
+                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyle[o.status]}`}>
                         {o.status}
                       </span>
                     </td>

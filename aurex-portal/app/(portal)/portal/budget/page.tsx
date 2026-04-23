@@ -30,9 +30,7 @@ export default function BudgetPage() {
   }
 
   const approvedOrders = orders.filter((o) => o.status === "approved");
-  const totalApproved = approvedOrders.reduce((s, o) => s + o.total, 0);
 
-  // Compute spend per department from real orders + seed some data so it looks realistic
   const seedSpend: Record<string, number> = {
     Chemistry: 12400,
     Biology: 7800,
@@ -59,8 +57,8 @@ export default function BudgetPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">Budget Management</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Budget Management</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Department budgets and spending for the current period.
         </p>
       </div>
@@ -91,15 +89,13 @@ export default function BudgetPage() {
           },
         ].map((s) => (
           <div key={s.label} className="card flex items-start gap-4">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${s.color}`}
-            >
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${s.color}`}>
               <s.icon size={18} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{s.label}</p>
-              <p className="mt-0.5 text-2xl font-bold text-gray-900">{s.value}</p>
-              <p className="mt-1 text-xs text-gray-400">{s.sub}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{s.label}</p>
+              <p className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">{s.value}</p>
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{s.sub}</p>
             </div>
           </div>
         ))}
@@ -107,7 +103,7 @@ export default function BudgetPage() {
 
       {/* Department breakdown */}
       <div className="card">
-        <h2 className="mb-5 text-sm font-semibold text-gray-900">Department Breakdown</h2>
+        <h2 className="mb-5 text-sm font-semibold text-gray-900 dark:text-white">Department Breakdown</h2>
         <div className="space-y-5">
           {depts.map((d) => {
             const remaining = d.budget - d.spent;
@@ -116,33 +112,29 @@ export default function BudgetPage() {
               <div key={d.name}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-900">{d.name}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{d.name}</span>
                     {isOver80 && (
-                      <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                         <AlertTriangle size={10} /> Over 80%
                       </span>
                     )}
                   </div>
-                  <div className="text-right text-xs text-gray-500">
-                    <span className="font-semibold text-gray-900">
+                  <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       ${d.spent.toLocaleString()}
                     </span>{" "}
                     / ${d.budget.toLocaleString()}
                   </div>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                   <div
                     className={`h-2 rounded-full transition-all ${
-                      d.pct >= 90
-                        ? "bg-red-500"
-                        : d.pct >= 80
-                        ? "bg-amber-500"
-                        : d.color
+                      d.pct >= 90 ? "bg-red-500" : d.pct >= 80 ? "bg-amber-500" : d.color
                     }`}
                     style={{ width: `${d.pct}%` }}
                   />
                 </div>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                   ${remaining.toLocaleString()} remaining · {d.pct.toFixed(0)}% used
                 </p>
               </div>
@@ -151,16 +143,16 @@ export default function BudgetPage() {
         </div>
       </div>
 
-      {/* Live approved orders from store */}
+      {/* Live approved orders */}
       {approvedOrders.length > 0 && (
         <div className="card">
-          <h2 className="mb-4 text-sm font-semibold text-gray-900">
+          <h2 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
             Approved Orders This Session
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-gray-100 dark:border-white/8">
                   {["Request #", "Requester", "Department", "Total", "Approved By"].map((h) => (
                     <th key={h} className="pb-3 text-left text-xs font-semibold text-gray-400">
                       {h}
@@ -168,14 +160,14 @@ export default function BudgetPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                 {approvedOrders.map((o) => (
-                  <tr key={o.id}>
-                    <td className="py-2.5 font-mono text-xs text-gray-500">{o.requestNumber}</td>
-                    <td className="py-2.5 text-gray-900">{o.requester.name}</td>
-                    <td className="py-2.5 text-gray-500">{o.requester.department}</td>
-                    <td className="py-2.5 font-semibold text-gray-900">${o.total.toFixed(2)}</td>
-                    <td className="py-2.5 text-gray-500">{o.reviewedBy ?? "—"}</td>
+                  <tr key={o.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5">
+                    <td className="py-2.5 font-mono text-xs text-gray-500 dark:text-gray-400">{o.requestNumber}</td>
+                    <td className="py-2.5 text-gray-900 dark:text-white">{o.requester.name}</td>
+                    <td className="py-2.5 text-gray-500 dark:text-gray-400">{o.requester.department}</td>
+                    <td className="py-2.5 font-semibold text-gray-900 dark:text-white">${o.total.toFixed(2)}</td>
+                    <td className="py-2.5 text-gray-500 dark:text-gray-400">{o.reviewedBy ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>

@@ -35,21 +35,21 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">User Management</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">User Management</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage team members and their portal access roles.
           </p>
         </div>
         <button
           disabled
           title="Connect a real auth provider to invite users"
-          className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-400"
+          className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-400 dark:border-white/15"
         >
           + Invite User
         </button>
       </div>
 
-      <div className="card divide-y divide-gray-50">
+      <div className="card divide-y divide-gray-50 dark:divide-white/5">
         {users.map((u) => {
           const Icon = roleIcon[u.role];
           const isSelf = u.email === currentUser.email;
@@ -60,19 +60,17 @@ export default function UsersPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-gray-900">{u.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{u.name}</p>
                   {isSelf && (
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-white/10 dark:text-gray-400">
                       you
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-gray-400">{u.email}</p>
               </div>
-              <div className="shrink-0 text-sm text-gray-500">{u.department}</div>
-              <span
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${roleBadge[u.role]}`}
-              >
+              <div className="shrink-0 text-sm text-gray-500 dark:text-gray-400">{u.department}</div>
+              <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${roleBadge[u.role]}`}>
                 <Icon size={11} />
                 {ROLE_LABELS[u.role]}
               </span>
@@ -81,7 +79,7 @@ export default function UsersPage() {
         })}
       </div>
 
-      <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+      <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400 dark:border-white/10">
         This is a mock user list. Connect a real auth provider (e.g. Clerk) to invite,
         deactivate, and manage users in production.
       </div>
