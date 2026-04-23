@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aurex-portal",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/aidenyue/Projects/AUREXWEB/aurex-portal && npm run dev"],
+      "port": 3000,
+      "autoPort": false
+    }
+  ]
+}

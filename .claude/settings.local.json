@@ -10,7 +10,9 @@
       "Bash(git remote *)",
       "Bash(git branch *)",
       "Bash(git push *)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ps -p 15138 -o command=)"
     ]
   }
 }
