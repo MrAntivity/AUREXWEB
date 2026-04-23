@@ -15,9 +15,9 @@ const founders = [
     bio: "Aiden co-founded Aurex Medical and serves as co-CEO. He drives company strategy and platform development — focused on building procurement infrastructure that fits how research institutions actually operate, rather than forcing labs to adapt to tools designed for someone else.",
   },
   {
-    name: "Kevin Liu",
+    name: "Kevin Niu",
     role: "CEO & Co-Founder",
-    initials: "KL",
+    initials: "KN",
     bio: "Kevin co-founded Aurex Medical and serves as co-CEO. He leads product procurement, building direct relationships with manufacturers to source and vet every item on the Aurex catalog. He works hands-on with institutions to understand what their labs need and makes sure the supply side delivers on it.",
   },
 ];

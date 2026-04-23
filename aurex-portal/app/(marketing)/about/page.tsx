@@ -36,10 +36,10 @@ const team = [
     initials: "AY",
   },
   {
-    name: "Kevin Liu",
+    name: "Kevin Niu",
     role: "CEO & Co-Founder",
     bio: "Leads product procurement, building direct relationships with manufacturers to source and vet every item on the Aurex catalog.",
-    initials: "KL",
+    initials: "KN",
   },
   {
     name: "Michael Lang",

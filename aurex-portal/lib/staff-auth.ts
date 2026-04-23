@@ -9,7 +9,7 @@ const STAFF_SESSION_KEY = "aurex_staff_session";
 
 const STAFF_USERS: (StaffUser & { password: string })[] = [
   { email: "aidenyue@aurexmed.com",      name: "Aiden Yue",      role: "CEO & Co-Founder",           initials: "AY", password: "password" },
-  { email: "kevinliu@aurexmed.com",      name: "Kevin Liu",      role: "CEO & Co-Founder",           initials: "KL", password: "password" },
+  { email: "kevinniu@aurexmed.com",      name: "Kevin Niu",      role: "CEO & Co-Founder",           initials: "KN", password: "password" },
   { email: "michaellang@aurexmed.com",   name: "Michael Lang",   role: "Head of Operations",         initials: "ML", password: "password" },
   { email: "petarmilenkov@aurexmed.com", name: "Petar Milenkov", role: "Director, West Coast Ops",   initials: "PM", password: "password" },
   { email: "devinswartz@aurexmed.com",   name: "Devin Swartz",   role: "Director, West Coast Ops",   initials: "DS", password: "password" },
