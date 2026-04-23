@@ -6,9 +6,10 @@ import { Menu, X, FlaskConical } from "lucide-react";
 
 const navLinks = [
   { href: "/products", label: "Products" },
-  { href: "/team", label: "Team" },
-  { href: "/about", label: "About" },
+  { href: "/solutions", label: "Solutions" },
   { href: "/partnerships", label: "Partnerships" },
+  { href: "/about", label: "About" },
+  { href: "/team", label: "Team" },
 ];
 
 export default function Navbar() {
@@ -42,7 +43,7 @@ export default function Navbar() {
             Portal Login
           </Link>
           <Link href="/quote" className="btn-primary py-2 text-sm">
-            Request a Quote
+            Request a Demo
           </Link>
         </div>
 
@@ -81,7 +82,7 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className="btn-primary py-2.5 text-center text-sm"
             >
-              Request a Quote
+              Request a Demo
             </Link>
           </div>
         </div>

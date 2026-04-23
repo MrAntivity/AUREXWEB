@@ -4,7 +4,8 @@ import { FlaskConical } from "lucide-react";
 const footerLinks = {
   Platform: [
     { label: "Products", href: "/products" },
-    { label: "Request a Quote", href: "/quote" },
+    { label: "Solutions", href: "/solutions" },
+    { label: "Request a Demo", href: "/quote" },
     { label: "Partnerships", href: "/partnerships" },
   ],
   Company: [
@@ -30,10 +31,7 @@ export default function Footer() {
               Modern lab supply procurement for schools and research institutions.
             </p>
             <p className="mt-4 text-xs text-gray-600">
-              <a
-                href="mailto:hello@aurexmedical.com"
-                className="transition hover:text-gray-400"
-              >
+              <a href="mailto:hello@aurexmedical.com" className="transition hover:text-gray-400">
                 hello@aurexmedical.com
               </a>
             </p>
@@ -46,11 +44,8 @@ export default function Footer() {
               </h4>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-gray-500 transition hover:text-white"
-                    >
+                  <li key={link.label}>
+                    <Link href={link.href} className="text-sm text-gray-500 transition hover:text-white">
                       {link.label}
                     </Link>
                   </li>
@@ -65,12 +60,8 @@ export default function Footer() {
             © {new Date().getFullYear()} Aurex Medical, Inc. All rights reserved.
           </p>
           <div className="flex gap-6 text-xs text-gray-600">
-            <a href="#" className="transition hover:text-gray-400">
-              Privacy Policy
-            </a>
-            <a href="#" className="transition hover:text-gray-400">
-              Terms of Service
-            </a>
+            <a href="#" className="transition hover:text-gray-400">Privacy Policy</a>
+            <a href="#" className="transition hover:text-gray-400">Terms of Service</a>
           </div>
         </div>
       </div>

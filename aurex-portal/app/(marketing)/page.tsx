@@ -200,7 +200,7 @@ export default function HomePage() {
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/quote" className="btn-primary px-8 py-4 text-base">
-              Request a Quote <ArrowRight size={16} />
+              Request a Demo <ArrowRight size={16} />
             </Link>
             <Link href="/products" className="btn-secondary px-8 py-4 text-base">
               Browse Products

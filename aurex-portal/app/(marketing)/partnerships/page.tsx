@@ -4,11 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Handshake,
-  TrendingUp,
-  Users,
   Globe,
+  Users,
+  TrendingUp,
   CheckCircle2,
+  GraduationCap,
 } from "lucide-react";
 
 const partnerTypes = [
@@ -23,8 +23,8 @@ const partnerTypes = [
     icon: Users,
     title: "Institutional Partners",
     description:
-      "University systems, school districts, and research consortia who want white-labeled procurement for their member organizations.",
-    perks: ["White-label option", "Consolidated billing", "Dedicated CSM", "Custom approval workflows"],
+      "University systems, school districts, and research consortia who want modern procurement for their member organizations.",
+    perks: ["White-label option", "Consolidated billing", "Dedicated account manager", "Custom approval workflows"],
   },
   {
     icon: TrendingUp,
@@ -33,15 +33,6 @@ const partnerTypes = [
       "ERP, LIMS, or inventory system providers who want to integrate with Aurex's procurement API.",
     perks: ["REST API access", "Webhook integrations", "Co-marketing opportunities", "Partner portal listing"],
   },
-];
-
-const currentPartners = [
-  { name: "Fisher Scientific", type: "Distributor", since: "2023" },
-  { name: "VWR International", type: "Distributor", since: "2023" },
-  { name: "California State University System", type: "Institution", since: "2024" },
-  { name: "EduLab Network", type: "Institution", since: "2024" },
-  { name: "LabWare LIMS", type: "Technology", since: "2024" },
-  { name: "Quartzy", type: "Technology", since: "2024" },
 ];
 
 export default function PartnershipsPage() {
@@ -59,40 +50,65 @@ export default function PartnershipsPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-hero-pattern py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-6 text-center">
-          <p className="section-label text-aurex-teal">Partnerships</p>
-          <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">
-            Grow Together with Aurex
+      <section className="bg-dark-bg px-6 pt-28 pb-20 sm:pt-36 sm:pb-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="section-label">Partnerships</p>
+          <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Build something better, together
           </h1>
-          <p className="mt-5 text-lg text-gray-300 max-w-2xl mx-auto">
-            We&apos;re building the infrastructure for institutional science procurement.
+          <p className="mt-6 text-lg text-gray-500 max-w-2xl mx-auto">
+            We&apos;re building infrastructure for institutional science procurement.
             Join us as a distributor, institutional partner, or technology integrator.
           </p>
         </div>
       </section>
 
+      {/* Who we work with */}
+      <section className="bg-dark-elevated py-24 sm:py-32">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <p className="section-label">Who we work with</p>
+          <h2 className="section-title-dark mt-2">Universities and higher education institutions</h2>
+          <p className="section-subtitle-dark mx-auto max-w-2xl">
+            Aurex is built for academic and research environments — universities, colleges,
+            and research institutions that need modern procurement infrastructure with the
+            controls and accountability that institutional purchasing requires.
+          </p>
+          <div className="mt-12 flex justify-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-aurex-blue/10 border border-aurex-blue/20">
+              <GraduationCap className="text-aurex-blue" size={36} strokeWidth={1.5} />
+            </div>
+          </div>
+          <p className="mt-6 text-sm text-gray-600">
+            If you represent a university, research lab, or higher education institution,
+            we&apos;d love to talk.
+          </p>
+          <a href="#inquiry" className="btn-primary mt-6 inline-flex px-6 py-3">
+            Get in touch <ArrowRight size={15} />
+          </a>
+        </div>
+      </section>
+
       {/* Partner Types */}
-      <section className="bg-white py-24 sm:py-32">
+      <section className="bg-dark-bg py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center">
             <p className="section-label">Partnership Programs</p>
-            <h2 className="section-title mt-2">Three ways to partner</h2>
+            <h2 className="section-title-dark mt-2">Three ways to partner</h2>
           </div>
-          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
             {partnerTypes.map((pt) => (
-              <div key={pt.title} className="card flex flex-col">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-50">
-                  <pt.icon className="text-aurex-blue" size={24} />
+              <div key={pt.title} className="card-dark flex flex-col">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-aurex-blue/10">
+                  <pt.icon className="text-aurex-blue" size={22} />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">{pt.title}</h3>
+                <h3 className="text-base font-semibold text-white">{pt.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-gray-500 flex-1">
                   {pt.description}
                 </p>
-                <ul className="mt-6 flex flex-col gap-2 border-t border-gray-100 pt-5">
+                <ul className="mt-6 flex flex-col gap-2 border-t border-white/10 pt-5">
                   {pt.perks.map((perk) => (
-                    <li key={perk} className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle2 className="shrink-0 text-aurex-teal" size={15} />
+                    <li key={perk} className="flex items-center gap-2 text-sm text-gray-400">
+                      <CheckCircle2 className="shrink-0 text-aurex-blue/60" size={14} />
                       {perk}
                     </li>
                   ))}
@@ -103,47 +119,21 @@ export default function PartnershipsPage() {
         </div>
       </section>
 
-      {/* Current Partners */}
-      <section className="bg-gray-50 py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <p className="section-label">Our Partners</p>
-            <h2 className="section-title mt-2">Who we work with</h2>
-          </div>
-          <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {currentPartners.map((p) => (
-              <div
-                key={p.name}
-                className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-5 text-center shadow-sm"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-50">
-                  <Handshake className="text-aurex-blue" size={20} />
-                </div>
-                <p className="mt-3 text-xs font-semibold text-gray-900">{p.name}</p>
-                <span className="mt-1 rounded-full bg-aurex-teal/10 px-2 py-0.5 text-xs text-aurex-teal">
-                  {p.type}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Inquiry Form */}
-      <section className="bg-white py-24 sm:py-32" id="inquiry">
+      <section className="bg-dark-elevated py-24 sm:py-32" id="inquiry">
         <div className="mx-auto max-w-2xl px-6">
           <div className="text-center">
             <p className="section-label">Get Started</p>
-            <h2 className="section-title mt-2">Partnership Inquiry</h2>
-            <p className="section-subtitle">
+            <h2 className="section-title-dark mt-2">Partnership Inquiry</h2>
+            <p className="section-subtitle-dark">
               Tell us about your organization and we&apos;ll reach out within 2 business days.
             </p>
           </div>
 
           {submitted ? (
-            <div className="mt-12 rounded-2xl border border-aurex-teal/30 bg-aurex-teal/5 p-10 text-center">
-              <CheckCircle2 className="mx-auto text-aurex-teal" size={40} />
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">Inquiry Received!</h3>
+            <div className="mt-12 rounded-2xl border border-aurex-blue/20 bg-aurex-blue/5 p-10 text-center">
+              <CheckCircle2 className="mx-auto text-aurex-blue" size={40} />
+              <h3 className="mt-4 text-xl font-semibold text-white">Inquiry Received</h3>
               <p className="mt-2 text-gray-500">
                 Our partnerships team will be in touch within 2 business days.
               </p>
@@ -152,9 +142,9 @@ export default function PartnershipsPage() {
             <form onSubmit={handleSubmit} className="mt-12 flex flex-col gap-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div>
-                  <label className="label">Full Name</label>
+                  <label className="label-dark">Full Name</label>
                   <input
-                    className="input"
+                    className="input-dark"
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -162,9 +152,9 @@ export default function PartnershipsPage() {
                   />
                 </div>
                 <div>
-                  <label className="label">Work Email</label>
+                  <label className="label-dark">Work Email</label>
                   <input
-                    className="input"
+                    className="input-dark"
                     type="email"
                     required
                     value={form.email}
@@ -174,9 +164,9 @@ export default function PartnershipsPage() {
                 </div>
               </div>
               <div>
-                <label className="label">Organization</label>
+                <label className="label-dark">Organization</label>
                 <input
-                  className="input"
+                  className="input-dark"
                   required
                   value={form.organization}
                   onChange={(e) => setForm({ ...form, organization: e.target.value })}
@@ -184,9 +174,9 @@ export default function PartnershipsPage() {
                 />
               </div>
               <div>
-                <label className="label">Partnership Type</label>
+                <label className="label-dark">Partnership Type</label>
                 <select
-                  className="input"
+                  className="input-dark"
                   required
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -199,9 +189,9 @@ export default function PartnershipsPage() {
                 </select>
               </div>
               <div>
-                <label className="label">Message</label>
+                <label className="label-dark">Message</label>
                 <textarea
-                  className="input min-h-[120px] resize-y"
+                  className="input-dark min-h-[120px] resize-y"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   placeholder="Tell us about your organization and what you're looking for..."

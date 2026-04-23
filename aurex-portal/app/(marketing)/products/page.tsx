@@ -108,7 +108,7 @@ export default function ProductsPage() {
             partners — all available through your institution&apos;s Aurex portal.
           </p>
           <Link href="/quote" className="btn-primary mt-8 inline-flex px-8 py-4 text-base">
-            Request a Quote <ArrowRight size={16} />
+            Request a Demo <ArrowRight size={16} />
           </Link>
         </div>
       </section>
@@ -181,7 +181,7 @@ export default function ProductsPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/quote" className="btn-primary px-8 py-3.5">
-              Request Custom Quote <ArrowRight size={16} />
+              Request a Demo <ArrowRight size={16} />
             </Link>
             <Link href="/team" className="btn-secondary px-8 py-3.5">
               Talk to Our Team
