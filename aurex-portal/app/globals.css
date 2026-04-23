@@ -43,7 +43,7 @@
   }
 
   .card {
-    @apply rounded-2xl border border-gray-100 bg-white p-6 shadow-sm;
+    @apply rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:bg-[#1a1a2a] dark:border-white/10 dark:shadow-none;
   }
 
   .card-dark {

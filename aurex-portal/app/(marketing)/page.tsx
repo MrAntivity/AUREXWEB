@@ -66,7 +66,7 @@ export default function HomePage() {
       <section className="relative flex min-h-screen flex-col items-center justify-center bg-dark-bg px-6">
         <div className="text-center">
           <p className="mb-6 text-xs font-semibold uppercase tracking-[0.35em] text-gray-600">
-            Est. 2024 · Lab Supply Procurement
+            Est. 2026 · Lab Supply Procurement
           </p>
           <h1 className="text-7xl font-extrabold leading-none tracking-tighter text-white sm:text-8xl lg:text-9xl">
             AUREX

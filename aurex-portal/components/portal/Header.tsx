@@ -8,12 +8,12 @@ export default function PortalHeader({ user }: { user: MockUser }) {
   const { cartCount, setCartOpen } = useStore();
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-white/8 dark:bg-[#0c0c13]">
       <div />
       <div className="flex items-center gap-3">
         <button
           onClick={() => setCartOpen(true)}
-          className="relative rounded-lg p-2 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600"
+          className="relative rounded-lg p-2 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-300"
           title="Cart"
         >
           <ShoppingCart size={18} />
@@ -24,13 +24,13 @@ export default function PortalHeader({ user }: { user: MockUser }) {
           )}
         </button>
         <button
-          className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600"
+          className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-300"
           title="Notifications"
         >
           <Bell size={18} />
         </button>
         <div className="text-right">
-          <p className="text-xs font-semibold leading-none text-gray-900">{user.name}</p>
+          <p className="text-xs font-semibold leading-none text-gray-900 dark:text-white">{user.name}</p>
           <p className="mt-0.5 text-xs leading-none text-gray-400">{user.email}</p>
         </div>
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-aurex-blue text-xs font-bold text-white">

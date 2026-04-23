@@ -40,6 +40,17 @@ export const CATEGORY_EMOJI: Record<Category, string> = {
   "Storage & Containers": "📦",
 };
 
+export const CATEGORY_FULFILLMENT: Record<Category, { fulfillmentTime: string; estimatedDelivery: string }> = {
+  "Syringes & Needles": { fulfillmentTime: "Same day", estimatedDelivery: "2–3 business days" },
+  "Pipettes & Tips":    { fulfillmentTime: "1 business day", estimatedDelivery: "3–5 business days" },
+  "PPE":                { fulfillmentTime: "Same day", estimatedDelivery: "1–3 business days" },
+  "Reagents & Chemicals": { fulfillmentTime: "1–2 business days", estimatedDelivery: "3–5 business days" },
+  "Glassware":          { fulfillmentTime: "1 business day", estimatedDelivery: "3–4 business days" },
+  "Instruments":        { fulfillmentTime: "1–3 business days", estimatedDelivery: "5–7 business days" },
+  "Dissection & Biology": { fulfillmentTime: "1–2 business days", estimatedDelivery: "3–5 business days" },
+  "Storage & Containers": { fulfillmentTime: "Same day", estimatedDelivery: "2–4 business days" },
+};
+
 export const CATEGORY_COLOR: Record<Category, string> = {
   "Syringes & Needles": "bg-blue-50 text-blue-700",
   "Pipettes & Tips": "bg-teal-50 text-teal-700",
@@ -170,7 +181,7 @@ export const PRODUCTS: Product[] = [
     price: 285.00,
     unit: "Each",
     description: "Process an entire 96-well plate row at once. Uniform spring tension across all channels.",
-    inStock: false,
+    inStock: true,
   },
   {
     sku: "PIP-006",
@@ -457,7 +468,7 @@ export const PRODUCTS: Product[] = [
     price: 299.00,
     unit: "Each",
     description: "Compact personal centrifuge. Holds 6 × 1.5/2 mL or 2 × 15 mL tubes. Push-button operation.",
-    inStock: false,
+    inStock: true,
   },
   {
     sku: "INS-005",
@@ -513,7 +524,7 @@ export const PRODUCTS: Product[] = [
     price: 42.99,
     unit: "Each",
     description: "Extended set with bone saw, teasing needle, and iris scissors. Autoclavable stainless steel.",
-    inStock: false,
+    inStock: true,
   },
   {
     sku: "DIS-003",

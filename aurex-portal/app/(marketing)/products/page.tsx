@@ -15,7 +15,7 @@ const categories = [
     description:
       "Single and multichannel pipettes, filter tips, wide-bore tips, and pipette controllers sourced from leading manufacturers.",
     products: ["Eppendorf Research Plus", "Gilson PIPETMAN", "Filter Tips 200μL", "Multichannel 8-Channel"],
-    badge: "In stock",
+    badge: null,
   },
   {
     name: "PPE & Safety",

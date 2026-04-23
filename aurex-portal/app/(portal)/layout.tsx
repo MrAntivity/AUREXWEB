@@ -8,15 +8,15 @@ import PortalSidebar from "@/components/portal/Sidebar";
 import PortalHeader from "@/components/portal/Header";
 import { StoreProvider } from "@/components/portal/StoreProvider";
 import CartDrawer from "@/components/portal/CartDrawer";
+import { DarkModeProvider } from "@/components/portal/DarkModeProvider";
 
 const AUTH_ROUTES = ["/portal/sign-in", "/portal/sign-up"];
 
-export default function PortalLayout({ children }: { children: React.ReactNode }) {
+function PortalShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<MockUser | null>(null);
   const [ready, setReady] = useState(false);
-
   const isAuthRoute = AUTH_ROUTES.some((r) => pathname.startsWith(r));
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
   return (
     <StoreProvider>
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen bg-gray-50 dark:bg-[#131320]">
         <PortalSidebar user={user} onLogout={handleLogout} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <PortalHeader user={user} />
@@ -57,5 +57,13 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         <CartDrawer />
       </div>
     </StoreProvider>
+  );
+}
+
+export default function PortalLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <DarkModeProvider>
+      <PortalShell>{children}</PortalShell>
+    </DarkModeProvider>
   );
 }
