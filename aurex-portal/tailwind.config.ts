@@ -9,19 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Using CSS variable format to support Tailwind opacity modifiers (e.g. bg-aurex-teal/10)
         "aurex-blue": "rgb(var(--color-aurex-blue) / <alpha-value>)",
         "aurex-blue-light": "rgb(var(--color-aurex-blue-light) / <alpha-value>)",
         "aurex-teal": "rgb(var(--color-aurex-teal) / <alpha-value>)",
+        "dark-bg": "#0c0c13",
+        "dark-elevated": "#131320",
+        "dark-card": "#1a1a2a",
         navy: {
-          50: "#eef2f8",
-          100: "#dce5f0",
-          900: "#0f1e40",
+          50: "#fff7ed",
+          100: "#ffedd5",
+          900: "#111827",
         },
       },
       backgroundImage: {
-        "hero-pattern":
-          "linear-gradient(135deg, #1e3a5f 0%, #122848 55%, #0a1a30 100%)",
+        "hero-pattern": "linear-gradient(135deg, #0c0c13 0%, #131320 100%)",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

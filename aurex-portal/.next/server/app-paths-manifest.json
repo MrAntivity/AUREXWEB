@@ -1,9 +1,0 @@
-{
-  "/(portal)/portal/catalog/page": "app/(portal)/portal/catalog/page.js",
-  "/(portal)/portal/orders/page": "app/(portal)/portal/orders/page.js",
-  "/(portal)/portal/approvals/page": "app/(portal)/portal/approvals/page.js",
-  "/(portal)/portal/budget/page": "app/(portal)/portal/budget/page.js",
-  "/(portal)/portal/reports/page": "app/(portal)/portal/reports/page.js",
-  "/(portal)/portal/users/page": "app/(portal)/portal/users/page.js",
-  "/(portal)/portal/dashboard/page": "app/(portal)/portal/dashboard/page.js"
-}

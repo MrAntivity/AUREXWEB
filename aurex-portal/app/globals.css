@@ -6,16 +6,14 @@
 
 @layer base {
   :root {
-    /* Hex values for non-Tailwind CSS usage */
-    --aurex-blue: #1e3a5f;
-    --aurex-blue-light: #2d5a8e;
-    --aurex-teal: #0d9488;
-    --aurex-accent: #3b82f6;
+    --aurex-blue: #f97316;
+    --aurex-blue-light: #ea580c;
+    --aurex-teal: #f97316;
+    --aurex-accent: #fb923c;
 
-    /* RGB components for Tailwind opacity modifiers (e.g. bg-aurex-teal/10) */
-    --color-aurex-blue: 30 58 95;
-    --color-aurex-blue-light: 45 90 142;
-    --color-aurex-teal: 13 148 136;
+    --color-aurex-blue: 249 115 22;
+    --color-aurex-blue-light: 234 88 12;
+    --color-aurex-teal: 249 115 22;
   }
 
   * {
@@ -37,7 +35,7 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-aurex-blue bg-white px-6 py-3 text-sm font-semibold text-aurex-blue shadow-sm transition-all hover:bg-navy-50 focus:outline-none focus:ring-2 focus:ring-aurex-blue focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-transparent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-white/10 hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2;
   }
 
   .btn-ghost {
@@ -48,6 +46,10 @@
     @apply rounded-2xl border border-gray-100 bg-white p-6 shadow-sm;
   }
 
+  .card-dark {
+    @apply rounded-2xl border border-white/10 bg-[#1a1a2a] p-6 transition-all hover:border-white/20;
+  }
+
   .section-label {
     @apply text-sm font-semibold uppercase tracking-widest text-aurex-teal;
   }
@@ -56,15 +58,31 @@
     @apply text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl;
   }
 
+  .section-title-dark {
+    @apply text-3xl font-bold tracking-tight text-white sm:text-4xl;
+  }
+
   .section-subtitle {
-    @apply mt-4 text-lg text-gray-600;
+    @apply mt-4 text-lg text-gray-500;
+  }
+
+  .section-subtitle-dark {
+    @apply mt-4 text-lg text-gray-400;
   }
 
   .input {
     @apply block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition focus:border-aurex-blue focus:outline-none focus:ring-2 focus:ring-aurex-blue/20;
   }
 
+  .input-dark {
+    @apply block w-full rounded-lg border border-white/10 bg-dark-card px-4 py-3 text-sm text-white placeholder-gray-500 shadow-sm transition focus:border-aurex-blue focus:outline-none focus:ring-2 focus:ring-aurex-blue/20;
+  }
+
   .label {
     @apply mb-1.5 block text-sm font-medium text-gray-700;
+  }
+
+  .label-dark {
+    @apply mb-1.5 block text-sm font-medium text-gray-400;
   }
 }

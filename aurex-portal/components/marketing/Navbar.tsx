@@ -6,6 +6,7 @@ import { Menu, X, FlaskConical } from "lucide-react";
 
 const navLinks = [
   { href: "/products", label: "Products" },
+  { href: "/team", label: "Team" },
   { href: "/about", label: "About" },
   { href: "/partnerships", label: "Partnerships" },
 ];
@@ -14,11 +15,11 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-aurex-blue backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-dark-bg/90 backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2 text-white">
-          <FlaskConical size={20} className="text-aurex-teal" />
-          <span className="text-sm font-bold tracking-tight">Aurex Medical</span>
+        <Link href="/" className="flex items-center gap-2">
+          <FlaskConical size={20} className="text-aurex-blue" />
+          <span className="text-sm font-bold tracking-tight text-white">Aurex Medical</span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -26,7 +27,7 @@ export default function Navbar() {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-gray-300 transition hover:text-white"
+              className="text-sm font-medium text-gray-400 transition hover:text-white"
             >
               {l.label}
             </Link>
@@ -36,7 +37,7 @@ export default function Navbar() {
         <div className="hidden items-center gap-4 md:flex">
           <Link
             href="/portal/sign-in"
-            className="text-sm font-medium text-gray-300 transition hover:text-white"
+            className="text-sm font-medium text-gray-400 transition hover:text-white"
           >
             Portal Login
           </Link>
@@ -46,7 +47,7 @@ export default function Navbar() {
         </div>
 
         <button
-          className="text-white md:hidden"
+          className="text-gray-400 md:hidden"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
@@ -55,14 +56,14 @@ export default function Navbar() {
       </nav>
 
       {open && (
-        <div className="border-t border-white/10 bg-aurex-blue px-6 pb-6 md:hidden">
+        <div className="border-t border-white/8 bg-dark-bg px-6 pb-6 md:hidden">
           <div className="flex flex-col gap-4 pt-4">
             {navLinks.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="text-sm font-medium text-gray-300 transition hover:text-white"
+                className="text-sm font-medium text-gray-400 transition hover:text-white"
               >
                 {l.label}
               </Link>
@@ -71,7 +72,7 @@ export default function Navbar() {
             <Link
               href="/portal/sign-in"
               onClick={() => setOpen(false)}
-              className="text-sm font-medium text-gray-300 transition hover:text-white"
+              className="text-sm font-medium text-gray-400 transition hover:text-white"
             >
               Portal Login
             </Link>
