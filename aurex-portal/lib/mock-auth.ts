@@ -8,6 +8,7 @@ export type MockUser = {
   role: MockRole;
   department: string;
   initials: string;
+  location?: string;
 };
 
 type MockUserRecord = MockUser & { password: string };
@@ -20,6 +21,7 @@ export const MOCK_USERS: Record<string, MockUserRecord> = {
     role: "super_admin",
     department: "Administration",
     initials: "AA",
+    location: "Admin HQ, Suite 200",
   },
   "dept@aurex.dev": {
     email: "dept@aurex.dev",
@@ -28,6 +30,7 @@ export const MOCK_USERS: Record<string, MockUserRecord> = {
     role: "department_admin",
     department: "Chemistry",
     initials: "DD",
+    location: "Chemistry Lab, Building A",
   },
   "req@aurex.dev": {
     email: "req@aurex.dev",
@@ -36,6 +39,7 @@ export const MOCK_USERS: Record<string, MockUserRecord> = {
     role: "requester",
     department: "Biology",
     initials: "RR",
+    location: "Biology Lab, Building B",
   },
   "finance@aurex.dev": {
     email: "finance@aurex.dev",
@@ -44,6 +48,7 @@ export const MOCK_USERS: Record<string, MockUserRecord> = {
     role: "finance_viewer",
     department: "Finance",
     initials: "FF",
+    location: "Finance Dept, Floor 2",
   },
 };
 

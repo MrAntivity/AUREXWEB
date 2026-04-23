@@ -6,21 +6,33 @@ export type CartItem = {
   qty: number;
 };
 
-export type OrderStatus = "pending" | "approved" | "rejected";
+export type OrderStatus = "pending" | "approved" | "rejected" | "fulfilled" | "shipped" | "delivered";
+
+export type TimelineStage = "requested" | "approved" | "rejected" | "fulfilled" | "shipped" | "delivered";
+
+export type OrderEvent = {
+  stage: TimelineStage;
+  by: string;
+  at: string;
+  notes?: string;
+};
 
 export type Order = {
   id: string;
   requestNumber: string;
   items: CartItem[];
   total: number;
-  requester: Pick<MockUser, "name" | "email" | "department" | "role">;
+  requester: Pick<MockUser, "name" | "email" | "department" | "role"> & { location?: string };
   status: OrderStatus;
   submittedAt: string;
   reviewedBy?: string;
   reviewedAt?: string;
   reviewNotes?: string;
+  trackingCode?: string;
+  timeline: OrderEvent[];
 };
 
 export const CART_KEY = "aurex_cart";
 export const ORDERS_KEY = "aurex_orders";
 export const COUNTER_KEY = "aurex_order_counter";
+export const BUDGETS_KEY = "aurex_budgets";

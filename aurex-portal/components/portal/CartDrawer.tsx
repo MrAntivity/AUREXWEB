@@ -21,6 +21,7 @@ export default function CartDrawer() {
       email: user.email,
       department: user.department,
       role: user.role,
+      location: user.location,
     });
     setLastOrder(order.requestNumber);
     setSubmitted(true);

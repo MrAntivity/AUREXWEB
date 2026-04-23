@@ -1,20 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { ChevronDown, ChevronRight, Clock, CheckCircle2, XCircle, Package, Truck } from "lucide-react";
 import { useStore } from "@/components/portal/StoreProvider";
 import { getStoredUser } from "@/lib/mock-auth";
 import type { Order } from "@/lib/store";
 
-const statusConfig = {
-  pending: { icon: Clock, label: "Pending", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  approved: { icon: CheckCircle2, label: "Approved", cls: "bg-green-50 text-green-700 ring-green-200" },
-  rejected: { icon: XCircle, label: "Rejected", cls: "bg-red-50 text-red-700 ring-red-200" },
-} as const;
+const statusConfig: Record<string, { icon: React.ElementType; label: string; cls: string }> = {
+  pending:   { icon: Clock,         label: "Pending",   cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  approved:  { icon: CheckCircle2,  label: "Approved",  cls: "bg-green-50 text-green-700 ring-green-200" },
+  rejected:  { icon: XCircle,       label: "Rejected",  cls: "bg-red-50 text-red-700 ring-red-200" },
+  fulfilled: { icon: Package,       label: "Fulfilled", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  shipped:   { icon: Truck,         label: "Shipped",   cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  delivered: { icon: CheckCircle2,  label: "Delivered", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
+};
 
 function OrderRow({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
-  const { icon: Icon, label, cls } = statusConfig[order.status];
+  const { icon: Icon, label, cls } = statusConfig[order.status] ?? statusConfig.pending;
 
   return (
     <>

@@ -13,6 +13,7 @@ import {
   Settings,
   FlaskConical,
   LogOut,
+  Truck,
 } from "lucide-react";
 import type { MockUser, MockRole } from "@/lib/mock-auth";
 import { ROLE_LABELS } from "@/lib/mock-auth";
@@ -20,6 +21,7 @@ import { ROLE_LABELS } from "@/lib/mock-auth";
 const navItems = [
   { href: "/portal/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/portal/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/portal/tracking", label: "Order Tracking", icon: Truck },
   { href: "/portal/approvals", label: "Approvals", icon: CheckSquare },
   { href: "/portal/budget", label: "Budget", icon: DollarSign },
   { href: "/portal/catalog", label: "Catalog", icon: Package },

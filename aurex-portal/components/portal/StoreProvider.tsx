@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import type { CartItem, Order, OrderStatus } from "@/lib/store";
+import type { CartItem, Order, OrderStatus, OrderEvent } from "@/lib/store";
 import { CART_KEY, ORDERS_KEY, COUNTER_KEY } from "@/lib/store";
 import type { MockUser } from "@/lib/mock-auth";
 import type { Product } from "@/lib/products";
@@ -15,9 +15,10 @@ type StoreContextValue = {
   removeFromCart: (sku: string) => void;
   updateQty: (sku: string, qty: number) => void;
   clearCart: () => void;
-  submitOrder: (requester: Pick<MockUser, "name" | "email" | "department" | "role">) => Order;
+  submitOrder: (requester: Pick<MockUser, "name" | "email" | "department" | "role"> & { location?: string }) => Order;
   approveOrder: (orderId: string, reviewerName: string, notes?: string) => void;
   rejectOrder: (orderId: string, reviewerName: string, notes?: string) => void;
+  clearOrders: () => void;
   cartTotal: number;
   cartCount: number;
 };
@@ -89,10 +90,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const clearCart = useCallback(() => setCart([]), []);
 
   const submitOrder = useCallback(
-    (requester: Pick<MockUser, "name" | "email" | "department" | "role">): Order => {
+    (requester: Pick<MockUser, "name" | "email" | "department" | "role"> & { location?: string }): Order => {
       const counter = load<number>(COUNTER_KEY, 0) + 1;
       save(COUNTER_KEY, counter);
       const total = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+      const now = new Date().toISOString();
       const order: Order = {
         id: `ord_${Date.now()}`,
         requestNumber: `PR-${new Date().getFullYear()}-${String(counter).padStart(3, "0")}`,
@@ -100,7 +102,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         total,
         requester,
         status: "pending",
-        submittedAt: new Date().toISOString(),
+        submittedAt: now,
+        timeline: [{ stage: "requested", by: requester.name, at: now }],
       };
       setOrders((prev) => [order, ...prev]);
       setCart([]);
@@ -111,6 +114,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   const approveOrder = useCallback((orderId: string, reviewerName: string, notes?: string) => {
+    const now = new Date().toISOString();
+    const event: OrderEvent = { stage: "approved", by: reviewerName, at: now, ...(notes ? { notes } : {}) };
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
@@ -118,8 +123,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               ...o,
               status: "approved" as OrderStatus,
               reviewedBy: reviewerName,
-              reviewedAt: new Date().toISOString(),
+              reviewedAt: now,
               reviewNotes: notes,
+              timeline: [...(o.timeline ?? []), event],
             }
           : o
       )
@@ -127,6 +133,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const rejectOrder = useCallback((orderId: string, reviewerName: string, notes?: string) => {
+    const now = new Date().toISOString();
+    const event: OrderEvent = { stage: "rejected", by: reviewerName, at: now, ...(notes ? { notes } : {}) };
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
@@ -134,13 +142,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               ...o,
               status: "rejected" as OrderStatus,
               reviewedBy: reviewerName,
-              reviewedAt: new Date().toISOString(),
+              reviewedAt: now,
               reviewNotes: notes,
+              timeline: [...(o.timeline ?? []), event],
             }
           : o
       )
     );
   }, []);
+
+  const clearOrders = useCallback(() => setOrders([]), []);
 
   const cartTotal = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
@@ -159,6 +170,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         submitOrder,
         approveOrder,
         rejectOrder,
+        clearOrders,
         cartTotal,
         cartCount,
       }}
