@@ -10,7 +10,11 @@
       "Bash(git remote *)",
       "Bash(git branch *)",
       "Bash(git push *)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ps -p 15138 -o command=)",
+      "Bash(gh pr create --title 'Add Claude Design launch config for aurex-portal' --body ' *)",
+      "Bash(brew list *)"
     ]
   }
 }
