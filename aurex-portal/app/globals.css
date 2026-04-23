@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Figtree:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -14,6 +14,19 @@
     --color-aurex-blue: 249 115 22;
     --color-aurex-blue-light: 234 88 12;
     --color-aurex-teal: 249 115 22;
+
+    /* Marketing site design tokens */
+    --mkt-bg: oklch(9% 0.012 55);
+    --mkt-bg-elevated: oklch(13% 0.014 55);
+    --mkt-bg-surface: oklch(18% 0.016 55);
+    --mkt-border: oklch(23% 0.015 55);
+    --mkt-border-subtle: oklch(17% 0.013 55);
+    --mkt-text: oklch(96% 0.007 55);
+    --mkt-text-secondary: oklch(62% 0.012 55);
+    --mkt-text-muted: oklch(38% 0.01 55);
+    --mkt-accent: oklch(68% 0.195 48);
+    --mkt-accent-hover: oklch(62% 0.195 48);
+    --mkt-accent-dim: oklch(68% 0.08 48);
   }
 
   * {
@@ -29,17 +42,30 @@
   }
 }
 
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-aurex-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-aurex-blue-light focus:outline-none focus:ring-2 focus:ring-aurex-blue focus:ring-offset-2 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-aurex-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-aurex-blue-light focus:outline-none focus:ring-2 focus:ring-aurex-blue focus:ring-offset-2 disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-transparent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-white/10 hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-white/20 bg-transparent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-white/10 hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2;
   }
 
   .card {

@@ -1,5 +1,6 @@
+"use client";
+
 import Link from "next/link";
-import { FlaskConical } from "lucide-react";
 
 const footerLinks = {
   Platform: [
@@ -12,40 +13,74 @@ const footerLinks = {
     { label: "About", href: "/about" },
     { label: "Team", href: "/team" },
   ],
-  Portal: [
-    { label: "Sign In", href: "/portal/sign-in" },
-  ],
+  Portal: [{ label: "Sign In", href: "/portal/sign-in" }],
 };
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/8 bg-dark-bg">
-      <div className="mx-auto max-w-7xl px-6 py-16">
+    <footer
+      style={{
+        backgroundColor: "var(--mkt-bg-elevated)",
+        borderTop: "1px solid var(--mkt-border)",
+      }}
+    >
+      <div className="mx-auto max-w-7xl px-8 py-16 sm:px-12 lg:px-16">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2">
-              <FlaskConical size={18} className="text-aurex-blue" />
-              <span className="text-sm font-bold text-white">Aurex Medical</span>
+            <Link href="/" className="inline-block">
+              <span
+                className="font-display text-base font-black uppercase tracking-wider"
+                style={{ color: "var(--mkt-text)" }}
+              >
+                Aurex{" "}
+                <span style={{ color: "var(--mkt-accent)" }}>Medical</span>
+              </span>
             </Link>
-            <p className="mt-3 text-xs leading-relaxed text-gray-500">
-              Modern lab supply procurement for schools and research institutions.
+            <p
+              className="mt-3 max-w-[28ch] text-xs leading-relaxed"
+              style={{ color: "var(--mkt-text-muted)" }}
+            >
+              Modern lab supply procurement for schools and research
+              institutions.
             </p>
-            <p className="mt-4 text-xs text-gray-600">
-              <a href="mailto:hello@aurexmedical.com" className="transition hover:text-gray-400">
-                hello@aurexmedical.com
-              </a>
-            </p>
+            <a
+              href="mailto:hello@aurexmedical.com"
+              className="mt-4 block text-xs transition-colors duration-150"
+              style={{ color: "var(--mkt-text-muted)" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--mkt-text-secondary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--mkt-text-muted)")
+              }
+            >
+              hello@aurexmedical.com
+            </a>
           </div>
 
           {Object.entries(footerLinks).map(([group, links]) => (
             <div key={group}>
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-600">
+              <h4
+                className="mb-4 text-[10px] font-semibold uppercase tracking-[0.45em]"
+                style={{ color: "var(--mkt-text-muted)" }}
+              >
                 {group}
               </h4>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="text-sm text-gray-500 transition hover:text-white">
+                    <Link
+                      href={link.href}
+                      className="text-sm transition-colors duration-150"
+                      style={{ color: "var(--mkt-text-secondary)" }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.color = "var(--mkt-text)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.color =
+                          "var(--mkt-text-secondary)")
+                      }
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -55,13 +90,34 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row">
-          <p className="text-xs text-gray-600">
-            © {new Date().getFullYear()} Aurex Medical, Inc. All rights reserved.
+        <div
+          className="mt-12 flex flex-col items-center justify-between gap-4 pt-8 sm:flex-row"
+          style={{ borderTop: "1px solid var(--mkt-border-subtle)" }}
+        >
+          <p
+            className="text-xs"
+            style={{ color: "var(--mkt-text-muted)" }}
+          >
+            © {new Date().getFullYear()} Aurex Medical, Inc. All rights
+            reserved.
           </p>
-          <div className="flex gap-6 text-xs text-gray-600">
-            <a href="#" className="transition hover:text-gray-400">Privacy Policy</a>
-            <a href="#" className="transition hover:text-gray-400">Terms of Service</a>
+          <div className="flex gap-6">
+            {["Privacy Policy", "Terms of Service"].map((label) => (
+              <a
+                key={label}
+                href="#"
+                className="text-xs transition-colors duration-150"
+                style={{ color: "var(--mkt-text-muted)" }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--mkt-text-secondary)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "var(--mkt-text-muted)")
+                }
+              >
+                {label}
+              </a>
+            ))}
           </div>
         </div>
       </div>

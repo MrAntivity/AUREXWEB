@@ -26,7 +26,8 @@ const config: Config = {
         "hero-pattern": "linear-gradient(135deg, #0c0c13 0%, #131320 100%)",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Figtree", "sans-serif"],
+        display: ["Barlow Condensed", "sans-serif"],
       },
     },
   },
