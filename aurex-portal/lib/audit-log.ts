@@ -6,7 +6,8 @@ export type AuditAction =
   | "stock_updated"
   | "staff_login"
   | "staff_logout"
-  | "order_status_changed";
+  | "order_status_changed"
+  | "staff_user_created";
 
 export type AuditEntry = {
   id: string;

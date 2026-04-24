@@ -8,10 +8,11 @@ import type { StaffUser } from "@/lib/staff-auth";
 import StaffSidebar from "@/components/staff/Sidebar";
 import StaffHeader from "@/components/staff/Header";
 import { addAuditEntry } from "@/lib/audit-log";
+import { StaffDarkModeProvider } from "@/components/staff/StaffDarkModeProvider";
 
 const AUTH_ROUTES = ["/staff/sign-in"];
 
-export default function StaffLayout({ children }: { children: React.ReactNode }) {
+function StaffShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<StaffUser | null>(null);
@@ -52,12 +53,20 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#f3f4f6] dark:bg-[#0c0c13]">
       <StaffSidebar user={user} onLogout={handleLogout} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <StaffHeader user={user} />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
+  );
+}
+
+export default function StaffLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <StaffDarkModeProvider>
+      <StaffShell>{children}</StaffShell>
+    </StaffDarkModeProvider>
   );
 }

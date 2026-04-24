@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FlaskConical, Loader2, ArrowRight } from "lucide-react";
 import { authenticate, setStoredUser } from "@/lib/mock-auth";
 import { getInstitutionById } from "@/lib/institutions";
@@ -80,10 +81,10 @@ export default function SignInPage() {
     <div className="flex min-h-screen bg-dark-bg">
       {/* Left panel — branding */}
       <div className="hidden w-1/2 flex-col justify-between bg-dark-elevated p-12 lg:flex border-r border-white/8">
-        <div className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <FlaskConical size={20} className="text-aurex-blue" />
           <span className="text-sm font-bold tracking-tight text-white">Aurex Medical</span>
-        </div>
+        </Link>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-aurex-blue">
             Institutional Portal
@@ -105,10 +106,10 @@ export default function SignInPage() {
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="mb-10 flex items-center justify-center gap-2.5 lg:hidden">
+          <Link href="/" className="mb-10 flex items-center justify-center gap-2.5 lg:hidden hover:opacity-80 transition-opacity">
             <FlaskConical size={20} className="text-aurex-blue" />
             <span className="text-sm font-bold text-white">Aurex Medical</span>
-          </div>
+          </Link>
 
           <h1 className="text-2xl font-extrabold tracking-tight text-white">Sign in to your portal</h1>
           <p className="mt-2 text-sm text-gray-500">

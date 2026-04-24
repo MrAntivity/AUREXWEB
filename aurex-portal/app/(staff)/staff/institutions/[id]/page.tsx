@@ -284,7 +284,7 @@ export default function InstitutionDetailPage() {
               <Building2 size={22} className="text-aurex-blue" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">{institution.name}</h1>
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{institution.name}</h1>
               <div className="mt-1 flex items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${

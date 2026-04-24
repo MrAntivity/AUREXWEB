@@ -12,6 +12,7 @@ export type MockUser = {
   location?: string;
   mustChangePassword?: boolean;
   status?: "active" | "inactive" | "deleted";
+  deactivationRequested?: boolean;
 };
 
 type MockUserRecord = MockUser & { password: string };
@@ -212,6 +213,29 @@ export function deleteUser(email: string): boolean {
     setStoredUser(userWithoutPw);
   }
   return true;
+}
+
+export function requestDeactivation(email: string): boolean {
+  const store = getUsersFromStore();
+  if (!store[email]) return false;
+  store[email] = { ...store[email], deactivationRequested: true };
+  saveUsersToStore(store);
+  return true;
+}
+
+export function dismissDeactivationRequest(email: string): boolean {
+  const store = getUsersFromStore();
+  if (!store[email]) return false;
+  store[email] = { ...store[email], deactivationRequested: false };
+  saveUsersToStore(store);
+  return true;
+}
+
+export function getDeactivationRequestCount(institutionId: string): number {
+  const store = getUsersFromStore();
+  return Object.values(store).filter(
+    (u) => u.institutionId === institutionId && u.deactivationRequested === true && u.status !== "deleted"
+  ).length;
 }
 
 export function authenticate(email: string, password: string): MockUser | null {

@@ -7,6 +7,7 @@ import {
   createUser,
   setUserStatus,
   deleteUser,
+  dismissDeactivationRequest,
   ROLE_LABELS,
 } from "@/lib/mock-auth";
 import type { MockRole, MockUser } from "@/lib/mock-auth";
@@ -23,6 +24,7 @@ import {
   PowerOff,
   Power,
   AlertTriangle,
+  Bell,
 } from "lucide-react";
 
 const roleIcon: Record<MockRole, React.ElementType> = {
@@ -409,6 +411,17 @@ export default function UsersPage() {
     loadUsers();
   }
 
+  function handleDeactivateWithRequest(u: MockUser) {
+    setUserStatus(u.email, "inactive");
+    dismissDeactivationRequest(u.email);
+    loadUsers();
+  }
+
+  function handleDismissDeactivation(u: MockUser) {
+    dismissDeactivationRequest(u.email);
+    loadUsers();
+  }
+
   function canActOn(target: MockUser): boolean {
     if (target.email === currentUser?.email) return false;
     if (currentUser?.role !== "super_admin" && target.role === "super_admin") return false;
@@ -417,6 +430,16 @@ export default function UsersPage() {
 
   const activeCount = users.filter((u) => u.status !== "inactive").length;
   const inactiveCount = users.filter((u) => u.status === "inactive").length;
+  const deactivationRequestCount = users.filter((u) => u.deactivationRequested).length;
+
+  // Sort: deactivation requests first, then active, then inactive
+  const sortedUsers = [...users].sort((a, b) => {
+    if (a.deactivationRequested && !b.deactivationRequested) return -1;
+    if (!a.deactivationRequested && b.deactivationRequested) return 1;
+    if (a.status !== "inactive" && b.status === "inactive") return -1;
+    if (a.status === "inactive" && b.status !== "inactive") return 1;
+    return 0;
+  });
 
   return (
     <>
@@ -426,6 +449,12 @@ export default function UsersPage() {
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">User Management</h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {activeCount} active · {inactiveCount} inactive
+              {deactivationRequestCount > 0 && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                  <Bell size={10} />
+                  {deactivationRequestCount} deactivation {deactivationRequestCount === 1 ? "request" : "requests"}
+                </span>
+              )}
             </p>
           </div>
           <button
@@ -438,15 +467,19 @@ export default function UsersPage() {
         </div>
 
         <div className="card divide-y divide-gray-50 dark:divide-white/5">
-          {users.map((u) => {
+          {sortedUsers.map((u) => {
             const Icon = roleIcon[u.role];
             const isSelf = u.email === currentUser?.email;
             const isInactive = u.status === "inactive";
+            const hasDeactivationRequest = !!u.deactivationRequested;
             const canAct = canActOn(u);
 
             return (
-              <div key={u.email} className={`flex items-center gap-4 py-4 ${isInactive ? "opacity-60" : ""}`}>
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-aurex-blue text-xs font-bold text-white">
+              <div
+                key={u.email}
+                className={`flex items-center gap-4 py-4 ${isInactive && !hasDeactivationRequest ? "opacity-60" : ""}`}
+              >
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${hasDeactivationRequest ? "bg-red-500" : "bg-aurex-blue"}`}>
                   {u.initials}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -457,7 +490,12 @@ export default function UsersPage() {
                         you
                       </span>
                     )}
-                    {isInactive && (
+                    {hasDeactivationRequest && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+                        <Bell size={9} /> Requested Deactivation
+                      </span>
+                    )}
+                    {isInactive && !hasDeactivationRequest && (
                       <span className="rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:border-white/10 dark:bg-white/8 dark:text-gray-400">
                         inactive
                       </span>
@@ -479,7 +517,22 @@ export default function UsersPage() {
                 </span>
 
                 {/* Actions */}
-                {canAct ? (
+                {hasDeactivationRequest && canAct ? (
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      onClick={() => handleDismissDeactivation(u)}
+                      className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-gray-400 dark:hover:bg-white/5"
+                    >
+                      Dismiss
+                    </button>
+                    <button
+                      onClick={() => handleDeactivateWithRequest(u)}
+                      className="flex items-center gap-1.5 rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+                    >
+                      <PowerOff size={12} /> Deactivate
+                    </button>
+                  </div>
+                ) : canAct ? (
                   <div className="flex shrink-0 items-center gap-1">
                     <button
                       onClick={() => handleToggleStatus(u)}

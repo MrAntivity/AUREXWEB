@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronRight, Clock, CheckCircle2, XCircle, Package, Truck } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ChevronDown, ChevronRight, Clock, CheckCircle2, XCircle, Package, Truck, Search, X, ChevronDown as ChevronDownSm } from "lucide-react";
 import { useStore } from "@/components/portal/StoreProvider";
 import { getStoredUser } from "@/lib/mock-auth";
 import type { Order } from "@/lib/store";
@@ -14,6 +14,8 @@ const statusConfig: Record<string, { icon: React.ElementType; label: string; cls
   shipped:   { icon: Truck,         label: "Shipped",   cls: "bg-violet-50 text-violet-700 ring-violet-200" },
   delivered: { icon: CheckCircle2,  label: "Delivered", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
 };
+
+type DateFilter = "all" | "7d" | "30d" | "90d";
 
 function OrderRow({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
@@ -104,10 +106,44 @@ export default function OrdersPage() {
   const { orders } = useStore();
   const user = getStoredUser();
 
-  const myOrders =
+  const [search, setSearch]           = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter]   = useState<DateFilter>("all");
+
+  const baseOrders =
     user?.role === "requester"
       ? orders.filter((o) => o.requester.email === user.email)
       : orders;
+
+  const filtered = useMemo(() => {
+    let result = [...baseOrders];
+
+    const now = Date.now();
+    if (dateFilter === "7d")  result = result.filter((o) => +new Date(o.submittedAt) >= now - 7  * 86_400_000);
+    if (dateFilter === "30d") result = result.filter((o) => +new Date(o.submittedAt) >= now - 30 * 86_400_000);
+    if (dateFilter === "90d") result = result.filter((o) => +new Date(o.submittedAt) >= now - 90 * 86_400_000);
+
+    if (statusFilter !== "all") result = result.filter((o) => o.status === statusFilter);
+
+    const q = search.toLowerCase();
+    if (q) {
+      result = result.filter(
+        (o) =>
+          o.requestNumber.toLowerCase().includes(q) ||
+          o.items.some((i) => i.product.name.toLowerCase().includes(q)),
+      );
+    }
+
+    return result;
+  }, [baseOrders, dateFilter, statusFilter, search]);
+
+  const hasFilters = statusFilter !== "all" || dateFilter !== "all" || search !== "";
+
+  function clearFilters() {
+    setSearch("");
+    setStatusFilter("all");
+    setDateFilter("all");
+  }
 
   return (
     <div className="space-y-5">
@@ -116,8 +152,60 @@ export default function OrdersPage() {
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Track the status of your purchase requests.</p>
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative max-w-xs flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by request # or item…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-aurex-blue focus:outline-none focus:ring-1 focus:ring-aurex-blue dark:border-white/10 dark:bg-[#1a1a2a] dark:text-white dark:placeholder-gray-600"
+          />
+        </div>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 focus:border-aurex-blue focus:outline-none dark:border-white/10 dark:bg-[#1a1a2a] dark:text-gray-300"
+          >
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="fulfilled">Fulfilled</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+          </select>
+          <ChevronDownSm size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
+        <div className="relative">
+          <select
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+            className="appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 focus:border-aurex-blue focus:outline-none dark:border-white/10 dark:bg-[#1a1a2a] dark:text-gray-300"
+          >
+            <option value="all">All Time</option>
+            <option value="7d">Last 7 Days</option>
+            <option value="30d">Last 30 Days</option>
+            <option value="90d">Last 90 Days</option>
+          </select>
+          <ChevronDownSm size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs text-gray-500 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-400 dark:hover:bg-white/5"
+          >
+            <X size={12} /> Clear Filters
+          </button>
+        )}
+        <p className="ml-auto text-sm text-gray-400">{filtered.length} orders</p>
+      </div>
+
       <div className="card">
-        {myOrders.length === 0 ? (
+        {baseOrders.length === 0 ? (
           <div className="flex h-40 flex-col items-center justify-center gap-2 text-sm text-gray-400">
             <p>No orders yet.</p>
             <a href="/portal/catalog" className="text-aurex-blue hover:underline">
@@ -138,9 +226,17 @@ export default function OrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-                {myOrders.map((order) => (
-                  <OrderRow key={order.id} order={order} />
-                ))}
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-10 text-center text-sm text-gray-400">
+                      No orders match your filters.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((order) => (
+                    <OrderRow key={order.id} order={order} />
+                  ))
+                )}
               </tbody>
             </table>
           </div>

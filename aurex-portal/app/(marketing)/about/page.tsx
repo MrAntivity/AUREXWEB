@@ -43,9 +43,15 @@ const team = [
   },
   {
     name: "Michael Lang",
-    role: "Head of Operations",
-    bio: "Oversees the operational backbone of Aurex — ensuring orders move efficiently, processes scale cleanly, and the team delivers for institutions.",
+    role: "CTO & Head of Operations",
+    bio: "Leads technology and oversees the operational backbone of Aurex — ensuring orders move efficiently, processes scale cleanly, and the team delivers for institutions.",
     initials: "ML",
+  },
+  {
+    name: "Andy Yoong",
+    role: "CFO",
+    bio: "Manages Aurex's financial strategy, forecasting, and institutional pricing — ensuring the company operates efficiently while delivering value to research institutions.",
+    initials: "AO",
   },
   {
     name: "Petar Milenkov",

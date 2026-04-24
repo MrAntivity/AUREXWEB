@@ -11,6 +11,7 @@ const footerLinks = {
   Company: [
     { label: "About", href: "/about" },
     { label: "Team", href: "/team" },
+    { label: "News", href: "/news" },
   ],
   Portal: [
     { label: "Sign In", href: "/portal/sign-in" },

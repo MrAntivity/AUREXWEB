@@ -25,9 +25,15 @@ const founders = [
 const operations = [
   {
     name: "Michael Lang",
-    role: "Head of Operations",
+    role: "CTO & Head of Operations",
     initials: "ML",
-    bio: "Michael oversees the operational backbone of Aurex Medical — ensuring orders move efficiently, processes scale cleanly, and the team has what it needs to deliver for institutions.",
+    bio: "Michael leads technology and oversees the operational backbone of Aurex Medical — ensuring orders move efficiently, processes scale cleanly, and the team delivers for institutions.",
+  },
+  {
+    name: "Andy Yoong",
+    role: "CFO",
+    initials: "AO",
+    bio: "Andy manages Aurex's financial strategy, forecasting, and institutional pricing — ensuring the company operates efficiently while delivering value to research institutions.",
   },
   {
     name: "Petar Milenkov",

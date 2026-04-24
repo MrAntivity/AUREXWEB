@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -9,6 +10,8 @@ import {
   DollarSign,
   Package,
   BarChart2,
+  TrendingUp,
+  Archive,
   Users,
   Settings,
   FlaskConical,
@@ -16,19 +19,30 @@ import {
   Truck,
 } from "lucide-react";
 import type { MockUser, MockRole } from "@/lib/mock-auth";
-import { ROLE_LABELS } from "@/lib/mock-auth";
+import { ROLE_LABELS, getDeactivationRequestCount } from "@/lib/mock-auth";
+import { useStore } from "@/components/portal/StoreProvider";
 
-const navItems = [
-  { href: "/portal/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/portal/catalog", label: "Catalog", icon: Package },
-  { href: "/portal/cart", label: "Cart & Orders", icon: ShoppingCart },
-  { href: "/portal/orders", label: "My Orders", icon: Package },
-  { href: "/portal/tracking", label: "Order Tracking", icon: Truck },
-  { href: "/portal/approvals", label: "Approvals", icon: CheckSquare },
-  { href: "/portal/budget", label: "Budget", icon: DollarSign },
-  { href: "/portal/reports", label: "Reports", icon: BarChart2 },
-  { href: "/portal/users", label: "Users", icon: Users },
-  { href: "/portal/settings", label: "Settings", icon: Settings },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  roles?: MockRole[];
+  newTab?: boolean;
+};
+
+const navItems: NavItem[] = [
+  { href: "/portal/dashboard",  label: "Dashboard",      icon: LayoutDashboard },
+  { href: "/portal/catalog",    label: "Catalog",         icon: Package },
+  { href: "/portal/cart",       label: "Cart & Orders",   icon: ShoppingCart },
+  { href: "/portal/orders",     label: "My Orders",       icon: Package },
+  { href: "/portal/tracking",   label: "Order Tracking",  icon: Truck },
+  { href: "/portal/approvals",  label: "Approvals",       icon: CheckSquare },
+  { href: "/portal/budget",     label: "Budget",          icon: DollarSign },
+  { href: "/portal/reports",    label: "Reports",         icon: BarChart2 },
+  { href: "/analytics",         label: "Analytics",       icon: TrendingUp, roles: ["super_admin", "finance_viewer"], newTab: true },
+  { href: "/portal/inventory",  label: "Inventory",       icon: Archive,    roles: ["super_admin", "department_admin"] },
+  { href: "/portal/users",      label: "Users",           icon: Users },
+  { href: "/portal/settings",   label: "Settings",        icon: Settings },
 ];
 
 const roleBadgeStyle: Record<MockRole, string> = {
@@ -38,6 +52,8 @@ const roleBadgeStyle: Record<MockRole, string> = {
   finance_viewer: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
 };
 
+const ADMIN_ROLES = new Set<MockRole>(["super_admin", "department_admin"]);
+
 export default function PortalSidebar({
   user,
   onLogout,
@@ -46,6 +62,20 @@ export default function PortalSidebar({
   onLogout: () => void;
 }) {
   const pathname = usePathname();
+  const { orders } = useStore();
+  const isAdmin = ADMIN_ROLES.has(user.role);
+
+  const [deactivationCount, setDeactivationCount] = useState(0);
+
+  useEffect(() => {
+    if (isAdmin) {
+      setDeactivationCount(getDeactivationRequestCount(user.institutionId ?? "aurex"));
+    }
+  }, [pathname, isAdmin, user.institutionId]);
+
+  const pendingApprovals = isAdmin
+    ? orders.filter((o) => o.status === "pending").length
+    : 0;
 
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-white/8 dark:bg-[#0c0c13]">
@@ -55,20 +85,47 @@ export default function PortalSidebar({
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname.startsWith(href);
-          return (
-            <Link
+        {navItems.filter(({ roles }) => !roles || roles.includes(user.role)).map(({ href, label, icon: Icon, newTab }) => {
+          const active = !newTab && pathname.startsWith(href);
+
+          const badge =
+            href === "/portal/approvals" && pendingApprovals > 0
+              ? pendingApprovals
+              : href === "/portal/users" && deactivationCount > 0
+              ? deactivationCount
+              : null;
+
+          const cls = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+            active
+              ? "bg-aurex-blue/10 text-aurex-blue dark:bg-aurex-blue/10 dark:text-aurex-blue"
+              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white"
+          }`;
+
+          const inner = (
+            <>
+              <Icon size={16} className={active ? "text-aurex-blue" : "text-gray-400 dark:text-gray-600"} />
+              <span className="flex-1">{label}</span>
+              {badge !== null && (
+                <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-aurex-blue px-1.5 text-[10px] font-bold text-white">
+                  {badge}
+                </span>
+              )}
+            </>
+          );
+
+          return newTab ? (
+            <a
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-aurex-blue/10 text-aurex-blue dark:bg-aurex-blue/10 dark:text-aurex-blue"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white"
-              }`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cls}
             >
-              <Icon size={16} className={active ? "text-aurex-blue" : "text-gray-400 dark:text-gray-600"} />
-              {label}
+              {inner}
+            </a>
+          ) : (
+            <Link key={href} href={href} className={cls}>
+              {inner}
             </Link>
           );
         })}

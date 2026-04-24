@@ -299,8 +299,8 @@ export default function InstitutionsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Institutions</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Institutions</h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {activeCount} active · {inactiveCount} suspended
             </p>
           </div>

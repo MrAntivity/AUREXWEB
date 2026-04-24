@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FlaskConical, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { FlaskConical, Loader2, ArrowRight, Shield } from "lucide-react";
 import { staffAuthenticate, setStoredStaffUser } from "@/lib/staff-auth";
 import { addAuditEntry } from "@/lib/audit-log";
 
@@ -35,61 +36,40 @@ export default function StaffSignInPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-bg">
-      {/* Left panel */}
-      <div className="hidden w-1/2 flex-col justify-between bg-dark-elevated p-12 lg:flex border-r border-white/8">
-        <div className="flex items-center gap-2.5">
-          <FlaskConical size={20} className="text-aurex-blue" />
-          <span className="text-sm font-bold tracking-tight text-white">Aurex Medical</span>
-        </div>
-        <div>
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-aurex-blue/20 bg-aurex-blue/10 px-3 py-1.5">
-            <ShieldCheck size={13} className="text-aurex-blue" />
-            <span className="text-xs font-semibold text-aurex-blue">Staff Access Only</span>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-dark-bg px-4 py-12">
+      {/* Top-left home link */}
+      <Link
+        href="/"
+        className="absolute left-8 top-8 flex items-center gap-2 text-gray-600 hover:text-gray-400 transition-colors"
+      >
+        <FlaskConical size={16} className="text-aurex-blue" />
+        <span className="text-xs font-semibold text-gray-500">Aurex Medical</span>
+      </Link>
+
+      {/* Center content */}
+      <div className="w-full max-w-[380px]">
+        {/* Logo + badge */}
+        <div className="mb-8 flex flex-col items-center gap-3 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-dark-elevated shadow-lg">
+            <FlaskConical size={26} className="text-aurex-blue" />
           </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-aurex-blue">
-            Internal Portal
-          </p>
-          <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-white">
-            Manage products,<br />fulfill orders.
-          </h2>
-          <p className="mt-5 text-base leading-relaxed text-gray-500">
-            The Aurex staff portal gives your team full control over the product
-            catalog, inventory, order fulfillment, and audit history.
-          </p>
-          <div className="mt-8 grid grid-cols-2 gap-3">
-            {[
-              { label: "Product Management", desc: "Add, edit, and manage stock levels" },
-              { label: "Order Visibility", desc: "See all orders from user portals" },
-              { label: "Audit Log", desc: "Complete history of every change" },
-              { label: "Team Access", desc: "Role-based access for your staff" },
-            ].map((item) => (
-              <div key={item.label} className="rounded-xl border border-white/8 bg-white/3 p-3">
-                <p className="text-xs font-semibold text-white">{item.label}</p>
-                <p className="mt-0.5 text-xs text-gray-600">{item.desc}</p>
-              </div>
-            ))}
+          <div>
+            <p className="text-base font-bold text-white">Aurex Medical</p>
+            <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-aurex-blue/20 bg-aurex-blue/8 px-2.5 py-1">
+              <Shield size={11} className="text-aurex-blue" />
+              <span className="text-xs font-semibold text-aurex-blue">Staff Portal</span>
+            </div>
           </div>
         </div>
-        <p className="text-xs text-gray-700">
-          © {new Date().getFullYear()} Aurex Medical, Inc. — Internal use only.
-        </p>
-      </div>
 
-      {/* Right panel */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm">
-          <div className="mb-2 flex items-center justify-center gap-2.5 lg:hidden">
-            <FlaskConical size={20} className="text-aurex-blue" />
-            <span className="text-sm font-bold text-white">Aurex Medical</span>
-          </div>
-
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">Staff sign in</h1>
-          <p className="mt-1.5 text-sm text-gray-500">
-            Use your <span className="text-aurex-blue">@aurexmed.com</span> credentials.
+        {/* Form card */}
+        <div className="rounded-2xl border border-white/8 bg-dark-elevated px-8 py-8 shadow-2xl">
+          <h1 className="text-xl font-bold tracking-tight text-white">Sign in</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Use your <span className="text-aurex-blue">@aurexmed.com</span> credentials
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
               <label className="label-dark">Email</label>
               <input
@@ -124,17 +104,29 @@ export default function StaffSignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full justify-center py-3"
+              className="btn-primary w-full justify-center py-3 mt-2"
             >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <>Sign In <ArrowRight size={15} /></>}
+              {loading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <>Sign In <ArrowRight size={15} /></>
+              )}
             </button>
           </form>
-
-          <p className="mt-8 text-center text-xs text-gray-700">
-            This portal is restricted to authorised Aurex Medical staff.<br />
-            Contact <a href="mailto:hello@aurexmedical.com" className="text-gray-500 hover:text-gray-300 transition">hello@aurexmedical.com</a> for access.
-          </p>
         </div>
+
+        <p className="mt-6 text-center text-xs text-gray-700">
+          This portal is restricted to authorised Aurex Medical staff.{" "}
+          <br className="hidden sm:block" />
+          Contact{" "}
+          <a
+            href="mailto:hello@aurexmedical.com"
+            className="text-gray-500 transition hover:text-gray-400"
+          >
+            hello@aurexmedical.com
+          </a>{" "}
+          for access.
+        </p>
       </div>
     </div>
   );
