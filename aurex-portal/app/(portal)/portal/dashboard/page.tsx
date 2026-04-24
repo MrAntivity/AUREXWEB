@@ -9,9 +9,20 @@ import {
   TrendingUp,
   AlertCircle,
   Package,
+  X,
 } from "lucide-react";
 import { useStore } from "@/components/portal/StoreProvider";
 import { getStoredUser } from "@/lib/mock-auth";
+import { BUDGETS_KEY, BUDGET_WARNING_KEY } from "@/lib/store";
+import { useState, useEffect } from "react";
+
+const DEFAULT_DEPARTMENTS = [
+  { name: "Chemistry", budget: 15000, color: "bg-blue-500" },
+  { name: "Biology", budget: 12000, color: "bg-green-500" },
+  { name: "Physics", budget: 8000, color: "bg-purple-500" },
+  { name: "Biochemistry", budget: 10000, color: "bg-amber-500" },
+  { name: "Microbiology", budget: 9000, color: "bg-teal-500" },
+];
 
 const statusStyle: Record<string, string> = {
   pending: "bg-amber-50 text-amber-700 ring-amber-200",
@@ -20,8 +31,41 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const { orders, cartCount, setCartOpen } = useStore();
+  const { orders, cartCount } = useStore();
   const user = getStoredUser();
+  const [budgetAlerts, setBudgetAlerts] = useState<{ name: string; pct: number; spent: number; budget: number }[]>([]);
+  const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
+
+  useEffect(() => {
+    let depts: { name: string; budget: number; color: string }[] = DEFAULT_DEPARTMENTS;
+    try {
+      const raw = localStorage.getItem(BUDGETS_KEY);
+      if (raw) depts = JSON.parse(raw);
+    } catch { /* ignore */ }
+
+    let threshold = 80;
+    try {
+      const raw = localStorage.getItem(BUDGET_WARNING_KEY);
+      if (raw !== null) threshold = parseFloat(raw);
+    } catch { /* ignore */ }
+
+    const spend: Record<string, number> = {};
+    for (const o of orders) {
+      if (o.status === "approved") {
+        spend[o.requester.department] = (spend[o.requester.department] ?? 0) + o.total;
+      }
+    }
+
+    const alerts = depts
+      .map((d) => {
+        const spent = spend[d.name] ?? 0;
+        const pct = (spent / d.budget) * 100;
+        return { name: d.name, pct, spent, budget: d.budget };
+      })
+      .filter((d) => d.pct >= threshold);
+
+    setBudgetAlerts(alerts);
+  }, [orders]);
 
   const myOrders =
     user?.role === "requester"
@@ -43,7 +87,7 @@ export default function DashboardPage() {
       sub: cartCount > 0 ? "ready to submit" : "cart is empty",
       icon: ShoppingCart,
       color: "bg-blue-50 text-blue-600",
-      onClick: () => setCartOpen(true),
+      href: "/portal/cart",
     },
     {
       label: "Pending Approval",
@@ -97,13 +141,6 @@ export default function DashboardPage() {
               </div>
             </div>
           );
-          if ("onClick" in s && s.onClick) {
-            return (
-              <button key={s.label} onClick={s.onClick} className="text-left">
-                {inner}
-              </button>
-            );
-          }
           if ("href" in s && s.href) {
             return (
               <Link key={s.label} href={s.href}>
@@ -115,18 +152,29 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Budget alert */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-900/20">
-        <AlertCircle className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" size={16} />
-        <div>
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-            Chemistry department is at 80% of monthly budget
-          </p>
-          <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
-            $12,400 of $15,000 used. New requests over $500 require Super Admin approval.
-          </p>
-        </div>
-      </div>
+      {/* Budget alerts */}
+      {budgetAlerts
+        .filter((a) => !dismissedAlerts.includes(a.name))
+        .map((a) => (
+          <div key={a.name} className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-900/20">
+            <AlertCircle className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" size={16} />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                {a.name} department is at {a.pct.toFixed(0)}% of monthly budget
+              </p>
+              <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
+                ${a.spent.toLocaleString()} of ${a.budget.toLocaleString()} used.
+              </p>
+            </div>
+            <button
+              onClick={() => setDismissedAlerts((prev) => [...prev, a.name])}
+              className="shrink-0 rounded p-0.5 text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+              aria-label="Dismiss"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
 
       {/* Recent orders */}
       <div className="card">

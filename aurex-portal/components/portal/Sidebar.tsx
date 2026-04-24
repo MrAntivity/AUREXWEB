@@ -20,11 +20,12 @@ import { ROLE_LABELS } from "@/lib/mock-auth";
 
 const navItems = [
   { href: "/portal/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/portal/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/portal/catalog", label: "Catalog", icon: Package },
+  { href: "/portal/cart", label: "Cart & Orders", icon: ShoppingCart },
+  { href: "/portal/orders", label: "My Orders", icon: Package },
   { href: "/portal/tracking", label: "Order Tracking", icon: Truck },
   { href: "/portal/approvals", label: "Approvals", icon: CheckSquare },
   { href: "/portal/budget", label: "Budget", icon: DollarSign },
-  { href: "/portal/catalog", label: "Catalog", icon: Package },
   { href: "/portal/reports", label: "Reports", icon: BarChart2 },
   { href: "/portal/users", label: "Users", icon: Users },
   { href: "/portal/settings", label: "Settings", icon: Settings },

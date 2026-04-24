@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, ShoppingCart, Plus, Minus, X, Clock, Truck, CheckCircle2, ImageIcon, AlertCircle } from "lucide-react";
+import { Search, ShoppingCart, Plus, Minus, X, Clock, Truck, CheckCircle2, ImageIcon, AlertCircle, Bookmark } from "lucide-react";
 import { CATEGORIES, CATEGORY_COLOR } from "@/lib/products";
 import { getProducts } from "@/lib/product-store";
 import type { ManagedProduct } from "@/lib/product-store";
@@ -30,13 +30,18 @@ export default function CatalogPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "All">("All");
   const [detailProduct, setDetailProduct] = useState<ManagedProduct | null>(null);
   const [modalQty, setModalQty] = useState(1);
-  const { cart, addToCart, updateQty } = useStore();
+  const { cart, savedItems, addToCart, updateQty, addToSaved } = useStore();
 
   useEffect(() => { setProducts(getProducts()); }, []);
 
   const cartMap = useMemo(
     () => Object.fromEntries(cart.map((i) => [i.product.sku, i.qty])),
     [cart]
+  );
+
+  const savedSet = useMemo(
+    () => new Set(savedItems.map((i) => i.product.sku)),
+    [savedItems]
   );
 
   const filtered = useMemo(() => {
@@ -80,6 +85,12 @@ export default function CatalogPage() {
       addToCart(toProduct(detailProduct));
       updateQty(detailProduct.sku, modalQty);
     }
+    closeDetail();
+  }
+
+  function handleModalSave() {
+    if (!detailProduct || detailProduct.stock === 0) return;
+    addToSaved(toProduct(detailProduct));
     closeDetail();
   }
 
@@ -310,41 +321,51 @@ export default function CatalogPage() {
                 </div>
 
                 {/* Price + qty + add */}
-                <div className="mt-auto flex items-center justify-between gap-4 border-t border-gray-100 pt-5 dark:border-white/8">
-                  <div>
-                    <p className="text-2xl font-extrabold text-gray-900 dark:text-white">
-                      ${detailProduct.price.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-400">{detailProduct.unit}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center rounded-lg border border-gray-200 dark:border-white/10">
+                <div className="mt-auto space-y-3 border-t border-gray-100 pt-5 dark:border-white/8">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-2xl font-extrabold text-gray-900 dark:text-white">
+                        ${detailProduct.price.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-400">{detailProduct.unit}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center rounded-lg border border-gray-200 dark:border-white/10">
+                        <button
+                          onClick={() => setModalQty((q) => Math.max(1, q - 1))}
+                          disabled={detailProduct.stock === 0}
+                          className="flex h-9 w-9 items-center justify-center text-gray-500 transition hover:text-gray-800 disabled:opacity-40 dark:text-gray-400 dark:hover:text-white"
+                        >
+                          <Minus size={13} />
+                        </button>
+                        <span className="w-8 text-center text-sm font-bold text-gray-900 dark:text-white">
+                          {modalQty}
+                        </span>
+                        <button
+                          onClick={() => setModalQty((q) => q + 1)}
+                          disabled={detailProduct.stock === 0}
+                          className="flex h-9 w-9 items-center justify-center text-gray-500 transition hover:text-gray-800 disabled:opacity-40 dark:text-gray-400 dark:hover:text-white"
+                        >
+                          <Plus size={13} />
+                        </button>
+                      </div>
                       <button
-                        onClick={() => setModalQty((q) => Math.max(1, q - 1))}
+                        onClick={handleModalAdd}
                         disabled={detailProduct.stock === 0}
-                        className="flex h-9 w-9 items-center justify-center text-gray-500 transition hover:text-gray-800 disabled:opacity-40 dark:text-gray-400 dark:hover:text-white"
+                        className="flex items-center gap-2 rounded-lg bg-aurex-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-aurex-blue-light disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        <Minus size={13} />
-                      </button>
-                      <span className="w-8 text-center text-sm font-bold text-gray-900 dark:text-white">
-                        {modalQty}
-                      </span>
-                      <button
-                        onClick={() => setModalQty((q) => q + 1)}
-                        disabled={detailProduct.stock === 0}
-                        className="flex h-9 w-9 items-center justify-center text-gray-500 transition hover:text-gray-800 disabled:opacity-40 dark:text-gray-400 dark:hover:text-white"
-                      >
-                        <Plus size={13} />
+                        <ShoppingCart size={14} /> Add to Cart
                       </button>
                     </div>
-                    <button
-                      onClick={handleModalAdd}
-                      disabled={detailProduct.stock === 0}
-                      className="flex items-center gap-2 rounded-lg bg-aurex-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-aurex-blue-light disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <ShoppingCart size={14} /> Add to Cart
-                    </button>
                   </div>
+                  <button
+                    onClick={handleModalSave}
+                    disabled={detailProduct.stock === 0 || savedSet.has(detailProduct.sku)}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-aurex-blue/30 hover:text-aurex-blue disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-gray-400 dark:hover:border-aurex-blue/30 dark:hover:text-aurex-blue"
+                  >
+                    <Bookmark size={13} />
+                    {savedSet.has(detailProduct.sku) ? "Already saved for later" : "Save for Later"}
+                  </button>
                 </div>
               </div>
             </div>

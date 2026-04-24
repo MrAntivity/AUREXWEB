@@ -49,14 +49,14 @@ const features = [
 ];
 
 const comparisons = [
-  { feature: "Institutional pricing", aurex: true, thermo: false },
-  { feature: "Role-based approval workflows", aurex: true, thermo: false },
-  { feature: "Per-department budget controls", aurex: true, thermo: false },
-  { feature: "Real-time spend dashboard", aurex: true, thermo: false },
-  { feature: "Automated PO generation", aurex: true, thermo: false },
-  { feature: "Dedicated account manager", aurex: true, thermo: false },
-  { feature: "Net-30 invoicing", aurex: true, thermo: true },
-  { feature: "Product variety", aurex: true, thermo: true },
+  { feature: "Institutional pricing", aurex: true, competitor: false },
+  { feature: "Role-based approval workflows", aurex: true, competitor: false },
+  { feature: "Per-department budget controls", aurex: true, competitor: false },
+  { feature: "Real-time spend dashboard", aurex: true, competitor: false },
+  { feature: "Automated PO generation", aurex: true, competitor: false },
+  { feature: "Dedicated account manager", aurex: true, competitor: false },
+  { feature: "Net-30 invoicing", aurex: true, competitor: true },
+  { feature: "Product variety", aurex: true, competitor: true },
 ];
 
 export default function HomePage() {
@@ -154,7 +154,7 @@ export default function HomePage() {
             <div className="grid grid-cols-3 border-b border-white/10 bg-white/5 px-6 py-4">
               <span className="text-sm font-semibold text-gray-500">Feature</span>
               <span className="text-center text-sm font-bold text-aurex-blue">Aurex Medical</span>
-              <span className="text-center text-sm font-semibold text-gray-600">Thermo Fisher</span>
+              <span className="text-center text-sm font-semibold text-gray-600">Typical Supplier</span>
             </div>
             {comparisons.map((row, i) => (
               <div
@@ -174,7 +174,7 @@ export default function HomePage() {
                   )}
                 </span>
                 <span className="flex justify-center">
-                  {row.thermo ? (
+                  {row.competitor ? (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10">
                       <span className="h-2 w-2 rounded-full bg-gray-500" />
                     </span>

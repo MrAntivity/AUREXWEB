@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { CartItem, Order, OrderStatus, OrderEvent } from "@/lib/store";
-import { CART_KEY, ORDERS_KEY, COUNTER_KEY } from "@/lib/store";
+import { CART_KEY, SAVED_KEY, ORDERS_KEY, COUNTER_KEY } from "@/lib/store";
 import type { MockUser } from "@/lib/mock-auth";
 import type { Product } from "@/lib/products";
 
 type StoreContextValue = {
   cart: CartItem[];
+  savedItems: CartItem[];
   orders: Order[];
   cartOpen: boolean;
   setCartOpen: (open: boolean) => void;
@@ -15,6 +16,10 @@ type StoreContextValue = {
   removeFromCart: (sku: string) => void;
   updateQty: (sku: string, qty: number) => void;
   clearCart: () => void;
+  saveForLater: (sku: string) => void;
+  addToSaved: (product: Product) => void;
+  moveToCart: (sku: string) => void;
+  removeFromSaved: (sku: string) => void;
   submitOrder: (requester: Pick<MockUser, "name" | "email" | "department" | "role"> & { location?: string }) => Order;
   approveOrder: (orderId: string, reviewerName: string, notes?: string) => void;
   rejectOrder: (orderId: string, reviewerName: string, notes?: string) => void;
@@ -40,25 +45,46 @@ function save(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+const ADMIN_ROLES = new Set(["super_admin", "department_admin"]);
+
+export function StoreProvider({
+  children,
+  userEmail,
+  institutionId,
+}: {
+  children: React.ReactNode;
+  userEmail: string;
+  institutionId: string;
+}) {
+  const cartKey = `${CART_KEY}_${userEmail}`;
+  const savedKey = `${SAVED_KEY}_${userEmail}`;
+  const ordersKey = `${ORDERS_KEY}_${institutionId}`;
+  const counterKey = `${COUNTER_KEY}_${institutionId}`;
+
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [savedItems, setSavedItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setCart(load<CartItem[]>(CART_KEY, []));
-    setOrders(load<Order[]>(ORDERS_KEY, []));
+    setCart(load<CartItem[]>(cartKey, []));
+    setSavedItems(load<CartItem[]>(savedKey, []));
+    setOrders(load<Order[]>(ordersKey, []));
     setHydrated(true);
-  }, []);
+  }, [cartKey, savedKey, ordersKey]);
 
   useEffect(() => {
-    if (hydrated) save(CART_KEY, cart);
-  }, [cart, hydrated]);
+    if (hydrated) save(cartKey, cart);
+  }, [cart, hydrated, cartKey]);
 
   useEffect(() => {
-    if (hydrated) save(ORDERS_KEY, orders);
-  }, [orders, hydrated]);
+    if (hydrated) save(savedKey, savedItems);
+  }, [savedItems, hydrated, savedKey]);
+
+  useEffect(() => {
+    if (hydrated) save(ordersKey, orders);
+  }, [orders, hydrated, ordersKey]);
 
   const addToCart = useCallback((product: Product) => {
     setCart((prev) => {
@@ -70,7 +96,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { product, qty: 1 }];
     });
-    setCartOpen(true);
   }, []);
 
   const removeFromCart = useCallback((sku: string) => {
@@ -89,28 +114,82 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => setCart([]), []);
 
+  const saveForLater = useCallback((sku: string) => {
+    setCart((prev) => {
+      const item = prev.find((i) => i.product.sku === sku);
+      if (item) {
+        setSavedItems((s) => {
+          const exists = s.find((i) => i.product.sku === sku);
+          return exists ? s : [...s, item];
+        });
+        return prev.filter((i) => i.product.sku !== sku);
+      }
+      return prev;
+    });
+  }, []);
+
+  const addToSaved = useCallback((product: Product) => {
+    setSavedItems((prev) => {
+      const exists = prev.find((i) => i.product.sku === product.sku);
+      return exists ? prev : [...prev, { product, qty: 1 }];
+    });
+  }, []);
+
+  const moveToCart = useCallback((sku: string) => {
+    setSavedItems((prev) => {
+      const item = prev.find((i) => i.product.sku === sku);
+      if (item) {
+        setCart((c) => {
+          const exists = c.find((i) => i.product.sku === sku);
+          return exists ? c : [...c, item];
+        });
+        return prev.filter((i) => i.product.sku !== sku);
+      }
+      return prev;
+    });
+  }, []);
+
+  const removeFromSaved = useCallback((sku: string) => {
+    setSavedItems((prev) => prev.filter((i) => i.product.sku !== sku));
+  }, []);
+
   const submitOrder = useCallback(
     (requester: Pick<MockUser, "name" | "email" | "department" | "role"> & { location?: string }): Order => {
-      const counter = load<number>(COUNTER_KEY, 0) + 1;
-      save(COUNTER_KEY, counter);
+      const counter = load<number>(counterKey, 0) + 1;
+      save(counterKey, counter);
       const total = cart.reduce((sum, i) => sum + i.product.price * i.qty, 0);
       const now = new Date().toISOString();
+      const isAdmin = ADMIN_ROLES.has(requester.role);
+
       const order: Order = {
         id: `ord_${Date.now()}`,
         requestNumber: `PR-${new Date().getFullYear()}-${String(counter).padStart(3, "0")}`,
         items: [...cart],
         total,
         requester,
-        status: "pending",
+        institutionId,
+        status: isAdmin ? ("approved" as OrderStatus) : ("pending" as OrderStatus),
         submittedAt: now,
-        timeline: [{ stage: "requested", by: requester.name, at: now }],
+        ...(isAdmin
+          ? {
+              reviewedBy: requester.name,
+              reviewedAt: now,
+              reviewNotes: "Auto-approved by admin",
+            }
+          : {}),
+        timeline: [
+          { stage: "requested", by: requester.name, at: now },
+          ...(isAdmin
+            ? [{ stage: "approved" as const, by: requester.name, at: now, notes: "Auto-approved" }]
+            : []),
+        ],
       };
       setOrders((prev) => [order, ...prev]);
       setCart([]);
       setCartOpen(false);
       return order;
     },
-    [cart]
+    [cart, institutionId, counterKey]
   );
 
   const approveOrder = useCallback((orderId: string, reviewerName: string, notes?: string) => {
@@ -160,6 +239,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     <StoreContext.Provider
       value={{
         cart,
+        savedItems,
         orders,
         cartOpen,
         setCartOpen,
@@ -167,6 +247,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         removeFromCart,
         updateQty,
         clearCart,
+        saveForLater,
+        addToSaved,
+        moveToCart,
+        removeFromSaved,
         submitOrder,
         approveOrder,
         rejectOrder,

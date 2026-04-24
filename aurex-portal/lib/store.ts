@@ -25,6 +25,7 @@ export type Order = {
   requester: Pick<MockUser, "name" | "email" | "department" | "role"> & { location?: string };
   status: OrderStatus;
   submittedAt: string;
+  institutionId: string;
   reviewedBy?: string;
   reviewedAt?: string;
   reviewNotes?: string;
@@ -33,6 +34,8 @@ export type Order = {
 };
 
 export const CART_KEY = "aurex_cart";
+export const SAVED_KEY = "aurex_saved";
 export const ORDERS_KEY = "aurex_orders";
 export const COUNTER_KEY = "aurex_order_counter";
 export const BUDGETS_KEY = "aurex_budgets";
+export const BUDGET_WARNING_KEY = "aurex_budget_warning_pct";

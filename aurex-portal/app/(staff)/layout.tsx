@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { getStoredStaffUser, clearStoredStaffUser } from "@/lib/staff-auth";
+import { runSeedIfNeeded } from "@/lib/data-seed";
 import type { StaffUser } from "@/lib/staff-auth";
 import StaffSidebar from "@/components/staff/Sidebar";
 import StaffHeader from "@/components/staff/Header";
@@ -19,6 +20,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
   const isAuthRoute = AUTH_ROUTES.some((r) => pathname.startsWith(r));
 
   useEffect(() => {
+    runSeedIfNeeded();
     const stored = getStoredStaffUser();
     setUser(stored);
     setReady(true);

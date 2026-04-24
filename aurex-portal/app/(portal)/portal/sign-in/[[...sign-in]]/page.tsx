@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FlaskConical, Loader2, ArrowRight } from "lucide-react";
 import { authenticate, setStoredUser } from "@/lib/mock-auth";
+import { getInstitutionById } from "@/lib/institutions";
 
 const QUICK_LOGINS = [
   {
@@ -51,13 +52,19 @@ export default function SignInPage() {
     setLoading(true);
     setError("");
     const user = authenticate(e, p);
-    if (user) {
-      setStoredUser(user);
-      router.push("/portal/dashboard");
-    } else {
+    if (!user) {
       setError("Invalid email or password.");
       setLoading(false);
+      return;
     }
+    const institution = getInstitutionById(user.institutionId ?? "aurex");
+    if (institution && institution.status === "inactive") {
+      setError("Your institution's access has been suspended. Please contact Aurex Medical.");
+      setLoading(false);
+      return;
+    }
+    setStoredUser(user);
+    router.push("/portal/dashboard");
   }
 
   function handleQuickLogin(quickEmail: string) {

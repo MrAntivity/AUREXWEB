@@ -9,14 +9,16 @@ import {
   ScrollText,
   FlaskConical,
   LogOut,
+  Building2,
 } from "lucide-react";
 import type { StaffUser } from "@/lib/staff-auth";
 
 const navItems = [
-  { href: "/staff/dashboard", label: "Dashboard",  icon: LayoutDashboard },
-  { href: "/staff/products",  label: "Products",   icon: Package },
-  { href: "/staff/orders",    label: "Orders",     icon: ShoppingBag },
-  { href: "/staff/audit",     label: "Audit Log",  icon: ScrollText },
+  { href: "/staff/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
+  { href: "/staff/institutions", label: "Institutions", icon: Building2 },
+  { href: "/staff/products",     label: "Products",     icon: Package },
+  { href: "/staff/orders",       label: "Orders",       icon: ShoppingBag },
+  { href: "/staff/audit",        label: "Audit Log",    icon: ScrollText },
 ];
 
 export default function StaffSidebar({
