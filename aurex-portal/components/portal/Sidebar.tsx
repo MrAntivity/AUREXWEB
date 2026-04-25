@@ -17,10 +17,12 @@ import {
   FlaskConical,
   LogOut,
   Truck,
+  MessageSquare,
 } from "lucide-react";
 import type { MockUser, MockRole } from "@/lib/mock-auth";
 import { ROLE_LABELS, getDeactivationRequestCount } from "@/lib/mock-auth";
 import { useStore } from "@/components/portal/StoreProvider";
+import { getUnreadCount } from "@/lib/messages-store";
 
 type NavItem = {
   href: string;
@@ -36,6 +38,7 @@ const navItems: NavItem[] = [
   { href: "/portal/cart",       label: "Cart & Orders",   icon: ShoppingCart },
   { href: "/portal/orders",     label: "My Orders",       icon: Package },
   { href: "/portal/tracking",   label: "Order Tracking",  icon: Truck },
+  { href: "/portal/messages",   label: "Messages",        icon: MessageSquare },
   { href: "/portal/approvals",  label: "Approvals",       icon: CheckSquare },
   { href: "/portal/budget",     label: "Budget",          icon: DollarSign },
   { href: "/portal/reports",    label: "Reports",         icon: BarChart2 },
@@ -66,12 +69,14 @@ export default function PortalSidebar({
   const isAdmin = ADMIN_ROLES.has(user.role);
 
   const [deactivationCount, setDeactivationCount] = useState(0);
+  const [msgUnreadCount, setMsgUnreadCount] = useState(0);
 
   useEffect(() => {
     if (isAdmin) {
       setDeactivationCount(getDeactivationRequestCount(user.institutionId ?? "aurex"));
     }
-  }, [pathname, isAdmin, user.institutionId]);
+    setMsgUnreadCount(getUnreadCount(user.email));
+  }, [pathname, isAdmin, user.institutionId, user.email]);
 
   const pendingApprovals = isAdmin
     ? orders.filter((o) => o.status === "pending").length
@@ -93,6 +98,8 @@ export default function PortalSidebar({
               ? pendingApprovals
               : href === "/portal/users" && deactivationCount > 0
               ? deactivationCount
+              : href === "/portal/messages" && msgUnreadCount > 0
+              ? msgUnreadCount
               : null;
 
           const cls = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${

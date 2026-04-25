@@ -54,7 +54,7 @@ function ForceChangePasswordModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#1a1a2a] p-8 shadow-2xl">
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#1a1a2a]">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aurex-blue/10">
             <FlaskConical size={18} className="text-aurex-blue" />
@@ -63,16 +63,16 @@ function ForceChangePasswordModal({
             <p className="text-xs font-semibold uppercase tracking-widest text-aurex-blue">
               Action Required
             </p>
-            <h2 className="text-lg font-bold text-white">Set your password</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Set your password</h2>
           </div>
         </div>
-        <p className="mb-6 text-sm text-gray-400">
+        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
           Your account was provisioned by an administrator. Please set a new password
           before continuing.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">
+            <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
               New password
             </label>
             <div className="relative">
@@ -82,13 +82,13 @@ function ForceChangePasswordModal({
                 onChange={(e) => setNewPwd(e.target.value)}
                 required
                 placeholder="Min. 6 characters"
-                className="input-dark pr-10"
+                className="form-input-portal pr-10"
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowNew((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 tabIndex={-1}
               >
                 {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -96,7 +96,7 @@ function ForceChangePasswordModal({
             </div>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">
+            <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
               Confirm new password
             </label>
             <div className="relative">
@@ -106,13 +106,13 @@ function ForceChangePasswordModal({
                 onChange={(e) => setConfirmPwd(e.target.value)}
                 required
                 placeholder="Repeat password"
-                className="input-dark pr-10"
+                className="form-input-portal pr-10"
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirm((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 tabIndex={-1}
               >
                 {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}

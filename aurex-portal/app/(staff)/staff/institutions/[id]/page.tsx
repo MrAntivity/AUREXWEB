@@ -137,17 +137,17 @@ function ConfirmModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0c0c13] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0c0c13]">
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-white/8">
           <div className="flex items-center gap-3">
             <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${isDestructive ? "bg-red-500/15" : "bg-green-500/15"}`}>
               <AlertTriangle size={15} className={isDestructive ? "text-red-400" : "text-green-400"} />
             </div>
-            <h2 className="text-sm font-semibold text-white">{title}</h2>
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-500 hover:bg-white/5 hover:text-gray-300"
+            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-300"
           >
             <X size={16} />
           </button>
@@ -155,27 +155,27 @@ function ConfirmModal({
 
         <div className="space-y-4 p-6">
           <div className={`rounded-lg border p-4 ${isDestructive ? "border-red-500/20 bg-red-500/10" : "border-green-500/20 bg-green-500/10"}`}>
-            <p className={`text-sm ${isDestructive ? "text-red-300" : "text-green-300"}`}>{description}</p>
+            <p className={`text-sm ${isDestructive ? "text-red-600 dark:text-red-300" : "text-green-700 dark:text-green-300"}`}>{description}</p>
           </div>
 
           {requiresTypedConfirm && (
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-400">
-                Type <span className="font-mono font-bold text-red-400">{confirmValue}</span> to confirm
+              <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                Type <span className="font-mono font-bold text-red-500 dark:text-red-400">{confirmValue}</span> to confirm
               </label>
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={confirmValue}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-red-500/40 focus:outline-none focus:ring-1 focus:ring-red-500/20"
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-red-500/40 focus:outline-none focus:ring-1 focus:ring-red-500/20 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-600"
                 autoComplete="off"
               />
             </div>
           )}
 
           {error && (
-            <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-400">
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
               {error}
             </p>
           )}
@@ -183,7 +183,7 @@ function ConfirmModal({
           <div className="flex items-center justify-end gap-3 pt-1">
             <button
               onClick={onClose}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-400 hover:bg-white/5"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-gray-400 dark:hover:bg-white/5"
             >
               Cancel
             </button>
@@ -272,7 +272,7 @@ export default function InstitutionDetailPage() {
         {/* Back */}
         <button
           onClick={() => router.push("/staff/institutions")}
-          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white"
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
         >
           <ArrowLeft size={15} /> Back to Institutions
         </button>

@@ -139,7 +139,7 @@ export default function InventoryPage() {
     setDeleteConfirm(null);
   }
 
-  const fi = "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-aurex-blue focus:outline-none focus:ring-1 focus:ring-aurex-blue dark:border-white/10 dark:bg-[#131320] dark:text-white dark:placeholder-gray-600";
+  const fi = "w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-aurex-blue focus:bg-white focus:outline-none focus:ring-1 focus:ring-aurex-blue dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:bg-white/8";
 
   return (
     <div className="space-y-5">
@@ -285,7 +285,7 @@ export default function InventoryPage() {
         <Modal onClose={closeAdd}>
           <ModalHeader title="Add Inventory Item" onClose={closeAdd} />
           <div className="p-6">
-            <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mb-5 text-sm text-gray-500 dark:text-gray-300">
               How would you like to add this item?
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -298,7 +298,7 @@ export default function InventoryPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">From Aurex Catalogue</p>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
                     Quick-add products directly from our medical supply catalogue. Name, SKU, and category are pre-filled.
                   </p>
                 </div>
@@ -313,7 +313,7 @@ export default function InventoryPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">Custom Item</p>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
                     Add a product from another vendor or existing stock you had before switching to Aurex.
                   </p>
                 </div>
@@ -339,7 +339,7 @@ export default function InventoryPage() {
                 placeholder="Search products by name or SKU…"
                 value={catSearch}
                 onChange={(e) => setCatSearch(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white py-1.5 pl-8 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-aurex-blue focus:outline-none dark:border-white/10 dark:bg-[#131320] dark:text-white dark:placeholder-gray-600"
+                className="w-full rounded-lg border border-gray-200 bg-gray-50 py-1.5 pl-8 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-aurex-blue focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
                 autoFocus
               />
             </div>
@@ -347,7 +347,7 @@ export default function InventoryPage() {
               <select
                 value={catCatFilter}
                 onChange={(e) => setCatCatFilter(e.target.value as Category | "all")}
-                className="appearance-none rounded-lg border border-gray-200 bg-white py-1.5 pl-3 pr-7 text-sm text-gray-700 focus:border-aurex-blue focus:outline-none dark:border-white/10 dark:bg-[#131320] dark:text-gray-300"
+                className="appearance-none rounded-lg border border-gray-200 bg-gray-50 py-1.5 pl-3 pr-7 text-sm text-gray-700 focus:border-aurex-blue focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
               >
                 <option value="all">All Categories</option>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -368,7 +368,7 @@ export default function InventoryPage() {
                   <button
                     key={product.sku}
                     onClick={() => handleSelectProduct(product)}
-                    className="group flex flex-col items-start gap-2 rounded-xl border border-gray-200 bg-white p-3.5 text-left transition hover:border-aurex-blue hover:shadow-sm dark:border-white/10 dark:bg-[#131320] dark:hover:border-aurex-blue"
+                    className="group flex flex-col items-start gap-2 rounded-xl border border-gray-200 bg-gray-50/80 p-3.5 text-left transition hover:border-aurex-blue hover:bg-white hover:shadow-sm dark:border-white/10 dark:bg-white/3 dark:hover:border-aurex-blue dark:hover:bg-white/6"
                   >
                     <div className="flex w-full items-start justify-between gap-2">
                       <span className="rounded-full bg-aurex-blue/10 px-2 py-0.5 text-[10px] font-medium text-aurex-blue">
@@ -692,7 +692,7 @@ function InventoryModal({
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-400">
+      <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
         {label}{required && <span className="ml-0.5 text-red-400">*</span>}
       </label>
       {children}

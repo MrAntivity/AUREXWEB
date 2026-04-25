@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -13,8 +14,10 @@ import {
   Newspaper,
   Users,
   Settings,
+  MessageSquare,
 } from "lucide-react";
 import type { StaffUser } from "@/lib/staff-auth";
+import { getStaffUnreadCount } from "@/lib/messages-store";
 
 const navSections = [
   {
@@ -23,6 +26,7 @@ const navSections = [
       { href: "/staff/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
       { href: "/staff/institutions", label: "Institutions", icon: Building2 },
       { href: "/staff/orders",       label: "Orders",       icon: ShoppingBag },
+      { href: "/staff/messages",     label: "Messages",     icon: MessageSquare },
     ],
   },
   {
@@ -49,6 +53,11 @@ export default function StaffSidebar({
   onLogout: () => void;
 }) {
   const pathname = usePathname();
+  const [msgUnread, setMsgUnread] = useState(0);
+
+  useEffect(() => {
+    setMsgUnread(getStaffUnreadCount());
+  }, [pathname]);
 
   return (
     <aside className="flex h-screen w-56 shrink-0 flex-col border-r border-white/6 bg-[#0a0a10]">
@@ -75,6 +84,8 @@ export default function StaffSidebar({
             <div className="space-y-0.5">
               {items.map(({ href, label: itemLabel, icon: Icon }) => {
                 const active = pathname.startsWith(href);
+                const badge =
+                  href === "/staff/messages" && msgUnread > 0 ? msgUnread : null;
                 return (
                   <Link
                     key={href}
@@ -89,7 +100,12 @@ export default function StaffSidebar({
                       size={14}
                       className={active ? "text-aurex-blue" : "text-gray-700"}
                     />
-                    {itemLabel}
+                    <span className="flex-1">{itemLabel}</span>
+                    {badge !== null && (
+                      <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-aurex-blue px-1 text-[9px] font-bold text-white">
+                        {badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}

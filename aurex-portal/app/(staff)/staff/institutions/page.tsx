@@ -81,19 +81,21 @@ function AddInstitutionModal({
     onClose();
   }
 
+  const inputCls = "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-aurex-blue/50 focus:outline-none focus:ring-1 focus:ring-aurex-blue/30 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-600";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0c0c13] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
+      <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0c0c13]">
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aurex-blue/15">
               <Building2 size={15} className="text-aurex-blue" />
             </div>
-            <h2 className="text-sm font-semibold text-white">Add New Institution</h2>
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Add New Institution</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-500 hover:bg-white/5 hover:text-gray-300"
+            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-300"
           >
             <X size={16} />
           </button>
@@ -107,7 +109,7 @@ function AddInstitutionModal({
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-400">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
               Institution Name <span className="text-red-400">*</span>
             </label>
             <input
@@ -116,12 +118,12 @@ function AddInstitutionModal({
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Boston University"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-aurex-blue/50 focus:outline-none focus:ring-1 focus:ring-aurex-blue/30"
+              className={inputCls}
             />
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-400">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
               Email Domain <span className="text-red-400">*</span>
             </label>
             <input
@@ -130,16 +132,16 @@ function AddInstitutionModal({
               onChange={(e) => setDomain(e.target.value)}
               required
               placeholder="bu.edu"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-aurex-blue/50 focus:outline-none focus:ring-1 focus:ring-aurex-blue/30"
+              className={inputCls}
             />
-            <p className="text-xs text-gray-600">Users with this domain will belong to this institution.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-600">Users with this domain will belong to this institution.</p>
           </div>
 
-          <div className="border-t border-white/8 pt-4">
+          <div className="border-t border-gray-100 pt-4 dark:border-white/8">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Super Admin Account</p>
             <div className="space-y-3">
               <div className="space-y-1">
-                <label className="block text-xs font-medium text-gray-400">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
                   Full Name <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -148,11 +150,11 @@ function AddInstitutionModal({
                   onChange={(e) => setAdminName(e.target.value)}
                   required
                   placeholder="Jane Smith"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-aurex-blue/50 focus:outline-none focus:ring-1 focus:ring-aurex-blue/30"
+                  className={inputCls}
                 />
               </div>
               <div className="space-y-1">
-                <label className="block text-xs font-medium text-gray-400">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
                   Email Address <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -161,12 +163,12 @@ function AddInstitutionModal({
                   onChange={(e) => setAdminEmail(e.target.value)}
                   required
                   placeholder="admin@bu.edu"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-aurex-blue/50 focus:outline-none focus:ring-1 focus:ring-aurex-blue/30"
+                  className={inputCls}
                   autoComplete="off"
                 />
               </div>
               <div className="space-y-1">
-                <label className="block text-xs font-medium text-gray-400">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
                   Password <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
@@ -176,19 +178,19 @@ function AddInstitutionModal({
                     onChange={(e) => setAdminPassword(e.target.value)}
                     required
                     placeholder="Min. 6 characters"
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 pr-9 text-sm text-white placeholder-gray-600 focus:border-aurex-blue/50 focus:outline-none focus:ring-1 focus:ring-aurex-blue/30"
+                    className={`${inputCls} pr-9`}
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPwd((v) => !v)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     tabIndex={-1}
                   >
                     {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
-                <p className="text-xs text-gray-600">The super admin will be prompted to set a new password on first login.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-600">The super admin will be prompted to set a new password on first login.</p>
               </div>
             </div>
           </div>
@@ -204,7 +206,7 @@ function AddInstitutionModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-400 hover:bg-white/5"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-gray-400 dark:hover:bg-white/5"
             >
               Cancel
             </button>
@@ -233,7 +235,7 @@ function InstitutionCard({ inst }: { inst: Institution }) {
   return (
     <button
       onClick={() => router.push(`/staff/institutions/${inst.id}`)}
-      className="group w-full rounded-xl border border-white/8 bg-white/3 p-5 text-left transition-all hover:border-aurex-blue/30 hover:bg-white/5"
+      className="group w-full rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm transition-all hover:border-aurex-blue/30 hover:shadow-md dark:border-white/8 dark:bg-white/3 dark:shadow-none dark:hover:bg-white/5"
     >
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="flex items-center gap-3">
@@ -241,7 +243,7 @@ function InstitutionCard({ inst }: { inst: Institution }) {
             <Building2 size={16} className="text-aurex-blue" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">{inst.name}</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{inst.name}</p>
             <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
               <Globe size={11} />
               {inst.domain}
@@ -264,7 +266,7 @@ function InstitutionCard({ inst }: { inst: Institution }) {
         </span>
       </div>
 
-      <div className="flex items-center justify-between border-t border-white/8 pt-3">
+      <div className="flex items-center justify-between border-t border-gray-100 pt-3 dark:border-white/8">
         <div className="flex items-center gap-1.5 text-xs text-gray-500">
           <Users size={12} />
           {activeCount} active user{activeCount !== 1 ? "s" : ""}
@@ -314,8 +316,8 @@ export default function InstitutionsPage() {
         </div>
 
         {institutions.length === 0 ? (
-          <div className="flex h-48 flex-col items-center justify-center gap-3 rounded-xl border border-white/8 bg-white/3 text-center">
-            <Building2 size={32} className="text-gray-700" />
+          <div className="flex h-48 flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white text-center shadow-sm dark:border-white/8 dark:bg-white/3 dark:shadow-none">
+            <Building2 size={32} className="text-gray-300 dark:text-gray-700" />
             <p className="text-sm text-gray-500">No institutions yet.</p>
           </div>
         ) : (
