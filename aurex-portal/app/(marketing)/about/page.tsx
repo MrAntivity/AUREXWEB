@@ -48,12 +48,6 @@ const team = [
     initials: "ML",
   },
   {
-    name: "Andy Yoong",
-    role: "CFO",
-    bio: "Manages Aurex's financial strategy, forecasting, and institutional pricing — ensuring the company operates efficiently while delivering value to research institutions.",
-    initials: "AO",
-  },
-  {
     name: "Petar Milenkov",
     role: "Director, West Coast Operations",
     bio: "Manages institutional relationships and day-to-day operations across the West Coast, working closely with universities and research labs.",
@@ -64,12 +58,6 @@ const team = [
     role: "Director, West Coast Operations",
     bio: "Supports West Coast operations focused on fulfillment logistics and building strong partnerships with institutions in the region.",
     initials: "DS",
-  },
-  {
-    name: "Drew Vo",
-    role: "Director, East Coast Operations",
-    bio: "Leads East Coast operations, managing institutional accounts and coordinating procurement logistics for universities and research organizations.",
-    initials: "DV",
   },
 ];
 

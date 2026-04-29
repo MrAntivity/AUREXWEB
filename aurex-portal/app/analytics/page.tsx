@@ -165,8 +165,8 @@ export default function AnalyticsStandalonePage() {
       .filter((o) => userFilter === "all" || o.requester.email      === userFilter);
   }, [orders, preset, deptFilter, userFilter]);
 
-  const approved     = useMemo(() => filtered.filter((o) => o.status === "approved"),     [filtered]);
-  const prevApproved = useMemo(() => prevFiltered.filter((o) => o.status === "approved"), [prevFiltered]);
+  const approved     = useMemo(() => filtered.filter((o) => ["approved", "fulfilled", "shipped", "delivered"].includes(o.status)),     [filtered]);
+  const prevApproved = useMemo(() => prevFiltered.filter((o) => ["approved", "fulfilled", "shipped", "delivered"].includes(o.status)), [prevFiltered]);
 
   const totalSpend     = useMemo(() => approved.reduce((s, o) => s + o.total, 0),     [approved]);
   const prevTotalSpend = useMemo(() => prevApproved.reduce((s, o) => s + o.total, 0), [prevApproved]);
@@ -211,7 +211,7 @@ export default function AnalyticsStandalonePage() {
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => v);
   }
 
-  const timeData   = useMemo(() => bucketOrders(filtered,  (o) => o.status === "approved" ? o.total : 0), [filtered, gran]); // eslint-disable-line react-hooks/exhaustive-deps
+  const timeData   = useMemo(() => bucketOrders(filtered,  (o) => ["approved", "fulfilled", "shipped", "delivered"].includes(o.status) ? o.total : 0), [filtered, gran]); // eslint-disable-line react-hooks/exhaustive-deps
   const volumeData = useMemo(() => bucketOrders(filtered,  () => 1),                                       [filtered, gran]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const deptSpend = useMemo(() => {

@@ -8,7 +8,6 @@ import {
   Users,
   TrendingUp,
   CheckCircle2,
-  GraduationCap,
 } from "lucide-react";
 
 const partnerTypes = [
@@ -73,12 +72,43 @@ export default function PartnershipsPage() {
             and research institutions that need modern procurement infrastructure with the
             controls and accountability that institutional purchasing requires.
           </p>
-          <div className="mt-12 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-aurex-blue/10 border border-aurex-blue/20">
-              <GraduationCap className="text-aurex-blue" size={36} strokeWidth={1.5} />
+
+          {/* Scrolling school names */}
+          <p className="mt-12 text-xs font-semibold uppercase tracking-[0.3em] text-gray-600">
+            Used in labs at
+          </p>
+          <div className="mt-8 overflow-hidden">
+            <style>{`
+              @keyframes marquee {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+              }
+              .marquee-track {
+                display: flex;
+                width: max-content;
+                animation: marquee 18s linear infinite;
+              }
+            `}</style>
+            <div className="marquee-track">
+              {[
+                "Boston University",
+                "Northeastern University",
+                "New York University",
+                "Boston University",
+                "Northeastern University",
+                "New York University",
+              ].map((name, i) => (
+                <span
+                  key={i}
+                  className="mx-10 text-3xl sm:text-4xl font-extrabold tracking-tight text-white/20 whitespace-nowrap select-none"
+                >
+                  {name}
+                </span>
+              ))}
             </div>
           </div>
-          <p className="mt-6 text-sm text-gray-600">
+
+          <p className="mt-10 text-sm text-gray-600">
             If you represent a university, research lab, or higher education institution,
             we&apos;d love to talk.
           </p>

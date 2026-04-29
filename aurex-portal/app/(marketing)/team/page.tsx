@@ -30,12 +30,6 @@ const operations = [
     bio: "Michael leads technology and oversees the operational backbone of Aurex Medical — ensuring orders move efficiently, processes scale cleanly, and the team delivers for institutions.",
   },
   {
-    name: "Andy Yoong",
-    role: "CFO",
-    initials: "AO",
-    bio: "Andy manages Aurex's financial strategy, forecasting, and institutional pricing — ensuring the company operates efficiently while delivering value to research institutions.",
-  },
-  {
     name: "Petar Milenkov",
     role: "Director, West Coast Operations",
     initials: "PM",
@@ -46,12 +40,6 @@ const operations = [
     role: "Director, West Coast Operations",
     initials: "DS",
     bio: "Devin supports West Coast operations alongside Petar, focused on fulfillment logistics and building strong partnerships with institutions in the region.",
-  },
-  {
-    name: "Drew Vo",
-    role: "Director, East Coast Operations",
-    initials: "DV",
-    bio: "Drew leads East Coast operations, managing institutional accounts and coordinating procurement logistics for universities and research organizations across the region.",
   },
 ];
 

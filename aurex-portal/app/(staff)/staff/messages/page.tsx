@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import {
-  MessageSquare, Send, Building2, ShoppingBag, Package,
+  MessageSquare, Send, Building2, ShoppingBag, Package, Trash2,
 } from "lucide-react";
 import {
   getStaffConversations,
   getMessages as getConvoMsgs,
   sendMessage,
   markStaffConversationRead,
+  purgeAllMessages,
   type Conversation,
   type Message,
   type MessageAttachment,
@@ -89,7 +90,13 @@ export default function StaffMessagesPage() {
     setUnreadCounts(counts);
   }
 
-  useEffect(() => { refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    refresh();
+    // Pre-select a conversation if navigated here with ?convo= param (e.g. from order modal)
+    const params = new URLSearchParams(window.location.search);
+    const initConvo = params.get("convo");
+    if (initConvo) setSelectedId(initConvo);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selectedId) { setMsgs([]); return; }
@@ -127,7 +134,24 @@ export default function StaffMessagesPage() {
       <div className="flex w-80 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-white/6 dark:bg-[#0a0a10]">
 
         <div className="border-b border-gray-200 px-5 py-4 dark:border-white/6">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Support Inbox</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Support Inbox</h2>
+            <button
+              onClick={() => {
+                if (window.confirm("Purge all messages? This cannot be undone.")) {
+                  purgeAllMessages();
+                  setConvos([]);
+                  setSelectedId(null);
+                  setMsgs([]);
+                  setUnreadCounts({});
+                }
+              }}
+              title="Purge all messages"
+              className="rounded p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
           <p className="mt-0.5 text-xs text-gray-500">Messages from portal users</p>
         </div>
 

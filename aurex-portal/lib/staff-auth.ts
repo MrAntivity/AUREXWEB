@@ -13,11 +13,9 @@ const STAFF_USERS_KEY = "aurex_staff_users_store";
 const DEFAULT_STAFF: StaffUserRecord[] = [
   { email: "aidenyue@aurexmed.com",      name: "Aiden Yue",      role: "CEO & Co-Founder",           initials: "AY", password: "password" },
   { email: "kevinniu@aurexmed.com",      name: "Kevin Niu",      role: "CEO & Co-Founder",           initials: "KN", password: "password" },
-  { email: "andyyoong@aurexmed.com",     name: "Andy Yoong",     role: "CFO",                        initials: "AO", password: "password" },
   { email: "michaellang@aurexmed.com",   name: "Michael Lang",   role: "CTO & Head of Operations",   initials: "ML", password: "password" },
   { email: "petarmilenkov@aurexmed.com", name: "Petar Milenkov", role: "Director, West Coast Ops",   initials: "PM", password: "password" },
   { email: "devinswartz@aurexmed.com",   name: "Devin Swartz",   role: "Director, West Coast Ops",   initials: "DS", password: "password" },
-  { email: "drewvo@aurexmed.com",        name: "Drew Vo",        role: "Director, East Coast Ops",   initials: "DV", password: "password" },
 ];
 
 function buildInitials(name: string): string {

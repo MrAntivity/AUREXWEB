@@ -7,6 +7,9 @@ export type AuditAction =
   | "staff_login"
   | "staff_logout"
   | "order_status_changed"
+  | "order_cancelled"
+  | "order_refunded"
+  | "order_edited"
   | "staff_user_created";
 
 export type AuditEntry = {

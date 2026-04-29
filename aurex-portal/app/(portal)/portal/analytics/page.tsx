@@ -177,7 +177,7 @@ export default function AnalyticsPage() {
   }, [orders, preset, customFrom, customTo, deptFilter, userFilter]);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const approved = useMemo(() => filtered.filter((o) => o.status === "approved"), [filtered]);
+  const approved = useMemo(() => filtered.filter((o) => ["approved", "fulfilled", "shipped", "delivered"].includes(o.status)), [filtered]);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const totalSpend = useMemo(() => approved.reduce((s, o) => s + o.total, 0), [approved]);
@@ -223,7 +223,7 @@ export default function AnalyticsPage() {
         label = date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
       }
       const e = map.get(key) ?? { label, value: 0 };
-      if (o.status === "approved") e.value += o.total;
+      if (["approved", "fulfilled", "shipped", "delivered"].includes(o.status)) e.value += o.total;
       map.set(key, e);
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => v);

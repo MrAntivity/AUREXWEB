@@ -192,3 +192,10 @@ export function getStaffUnreadCount(): number {
     (m) => ids.has(m.conversationId) && m.senderId !== "aurex_staff" && !readSet.has(m.id),
   ).length;
 }
+
+export function purgeAllMessages(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(CONVOS_KEY);
+  localStorage.removeItem(MSGS_KEY);
+  localStorage.removeItem(STAFF_READ_KEY);
+}

@@ -151,14 +151,20 @@ export default function PortalMessagesPage() {
   // ── available contacts based on role rules ──
   const availableContacts = useMemo((): ContactInfo[] => {
     const store = getUsersFromStore();
+    const myRole = user!.role;
     return Object.values(store)
       .filter((u) => {
         if (u.email === user!.email) return false;
         if (u.status !== "active") return false;
         if (u.institutionId !== user!.institutionId) return false;
-        if (u.department === user!.department) return true;
-        if (user!.role === "department_admin" && u.role === "super_admin") return true;
-        if (user!.role === "super_admin" && u.role === "department_admin") return true;
+        // super_admin and department_admin: can message anyone in the organization
+        if (myRole === "super_admin" || myRole === "department_admin") return true;
+        // finance_viewer: can message everyone in the organization
+        if (myRole === "finance_viewer") return true;
+        // requester: can only message their department admin
+        if (myRole === "requester") {
+          return u.role === "department_admin" && u.department === user!.department;
+        }
         return false;
       })
       .map((u) => ({

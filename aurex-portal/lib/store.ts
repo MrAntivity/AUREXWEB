@@ -6,9 +6,9 @@ export type CartItem = {
   qty: number;
 };
 
-export type OrderStatus = "pending" | "approved" | "rejected" | "fulfilled" | "shipped" | "delivered";
+export type OrderStatus = "pending" | "approved" | "rejected" | "fulfilled" | "shipped" | "delivered" | "cancelled" | "refunded";
 
-export type TimelineStage = "requested" | "approved" | "rejected" | "fulfilled" | "shipped" | "delivered";
+export type TimelineStage = "requested" | "approved" | "rejected" | "fulfilled" | "shipped" | "delivered" | "cancelled" | "refunded" | "edited";
 
 export type OrderEvent = {
   stage: TimelineStage;

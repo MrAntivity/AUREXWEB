@@ -18,11 +18,13 @@ import {
   LogOut,
   Truck,
   MessageSquare,
+  ClipboardList,
 } from "lucide-react";
 import type { MockUser, MockRole } from "@/lib/mock-auth";
 import { ROLE_LABELS, getDeactivationRequestCount } from "@/lib/mock-auth";
 import { useStore } from "@/components/portal/StoreProvider";
 import { getUnreadCount } from "@/lib/messages-store";
+import { getNotificationCount } from "@/lib/notifications";
 
 type NavItem = {
   href: string;
@@ -36,6 +38,7 @@ const navItems: NavItem[] = [
   { href: "/portal/dashboard",  label: "Dashboard",      icon: LayoutDashboard },
   { href: "/portal/catalog",    label: "Catalog",         icon: Package },
   { href: "/portal/cart",       label: "Cart & Orders",   icon: ShoppingCart },
+  { href: "/portal/requests",   label: "My Requests",     icon: ClipboardList,  roles: ["requester"] },
   { href: "/portal/orders",     label: "My Orders",       icon: Package },
   { href: "/portal/tracking",   label: "Order Tracking",  icon: Truck },
   { href: "/portal/messages",   label: "Messages",        icon: MessageSquare },
@@ -70,12 +73,14 @@ export default function PortalSidebar({
 
   const [deactivationCount, setDeactivationCount] = useState(0);
   const [msgUnreadCount, setMsgUnreadCount] = useState(0);
+  const [requestNotifCount, setRequestNotifCount] = useState(0);
 
   useEffect(() => {
     if (isAdmin) {
       setDeactivationCount(getDeactivationRequestCount(user.institutionId ?? "aurex"));
     }
     setMsgUnreadCount(getUnreadCount(user.email));
+    setRequestNotifCount(getNotificationCount(user.email));
   }, [pathname, isAdmin, user.institutionId, user.email]);
 
   const pendingApprovals = isAdmin
@@ -100,6 +105,8 @@ export default function PortalSidebar({
               ? deactivationCount
               : href === "/portal/messages" && msgUnreadCount > 0
               ? msgUnreadCount
+              : href === "/portal/requests" && requestNotifCount > 0
+              ? requestNotifCount
               : null;
 
           const cls = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${

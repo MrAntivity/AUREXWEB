@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ChevronDown, ChevronRight, Clock, CheckCircle2, XCircle, Package, Truck, Search, X, ChevronDown as ChevronDownSm } from "lucide-react";
+import { ChevronDown, ChevronRight, Clock, CheckCircle2, XCircle, Package, Truck, Search, X, ChevronDown as ChevronDownSm, Ban, RotateCcw } from "lucide-react";
 import { useStore } from "@/components/portal/StoreProvider";
 import { getStoredUser } from "@/lib/mock-auth";
 import type { Order } from "@/lib/store";
 
 const statusConfig: Record<string, { icon: React.ElementType; label: string; cls: string }> = {
-  pending:   { icon: Clock,         label: "Pending",   cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  approved:  { icon: CheckCircle2,  label: "Approved",  cls: "bg-green-50 text-green-700 ring-green-200" },
-  rejected:  { icon: XCircle,       label: "Rejected",  cls: "bg-red-50 text-red-700 ring-red-200" },
-  fulfilled: { icon: Package,       label: "Fulfilled", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  shipped:   { icon: Truck,         label: "Shipped",   cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  delivered: { icon: CheckCircle2,  label: "Delivered", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
+  pending:   { icon: Clock,        label: "Pending",   cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  approved:  { icon: CheckCircle2, label: "Approved",  cls: "bg-green-50 text-green-700 ring-green-200" },
+  rejected:  { icon: XCircle,      label: "Rejected",  cls: "bg-red-50 text-red-700 ring-red-200" },
+  fulfilled: { icon: Package,      label: "Fulfilled", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  shipped:   { icon: Truck,        label: "Shipped",   cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  delivered: { icon: CheckCircle2, label: "Delivered", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
+  cancelled: { icon: Ban,          label: "Cancelled", cls: "bg-red-50 text-red-700 ring-red-200" },
+  refunded:  { icon: RotateCcw,    label: "Refunded",  cls: "bg-orange-50 text-orange-700 ring-orange-200" },
 };
 
 type DateFilter = "all" | "7d" | "30d" | "90d";
@@ -20,6 +22,11 @@ type DateFilter = "all" | "7d" | "30d" | "90d";
 function OrderRow({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
   const { icon: Icon, label, cls } = statusConfig[order.status] ?? statusConfig.pending;
+
+  const cancelEvent = order.timeline?.find((e) => e.stage === "cancelled");
+  const refundEvent = order.timeline?.find((e) => e.stage === "refunded");
+  const editCount = order.timeline?.filter((e) => e.stage === "edited").length ?? 0;
+  const shippedEvent = order.timeline?.find((e) => e.stage === "shipped");
 
   return (
     <>
@@ -84,16 +91,54 @@ function OrderRow({ order }: { order: Order }) {
                   ))}
                 </tbody>
               </table>
-              {order.reviewedBy && (
-                <div className="mt-3 border-t border-gray-200 pt-3 text-xs text-gray-500 dark:border-white/10 dark:text-gray-400">
-                  <span className="font-medium">{order.reviewedBy}</span>{" "}
-                  {order.status === "approved" ? "approved" : "rejected"} this order on{" "}
-                  {new Date(order.reviewedAt!).toLocaleDateString()}.
-                  {order.reviewNotes && (
-                    <span className="ml-1 italic">&ldquo;{order.reviewNotes}&rdquo;</span>
-                  )}
-                </div>
-              )}
+
+              <div className="mt-3 space-y-2 border-t border-gray-200 pt-3 dark:border-white/10">
+                {order.reviewedBy && (order.status === "approved" || order.status === "rejected") && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="font-medium">{order.reviewedBy}</span>{" "}
+                    {order.status === "approved" ? "approved" : "rejected"} this order on{" "}
+                    {new Date(order.reviewedAt!).toLocaleDateString()}.
+                    {order.reviewNotes && (
+                      <span className="ml-1 italic">&ldquo;{order.reviewNotes}&rdquo;</span>
+                    )}
+                  </p>
+                )}
+
+                {(order.status === "shipped" || order.status === "delivered") && order.trackingCode && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Tracking: <span className="font-mono font-semibold text-gray-700 dark:text-gray-200">{order.trackingCode}</span>
+                    {shippedEvent && (
+                      <span className="ml-1 text-gray-400">· Shipped {new Date(shippedEvent.at).toLocaleDateString()}</span>
+                    )}
+                  </p>
+                )}
+
+                {cancelEvent && (
+                  <p className="text-xs text-red-600 dark:text-red-400">
+                    Cancelled by <span className="font-medium">{cancelEvent.by}</span> on{" "}
+                    {new Date(cancelEvent.at).toLocaleDateString()}.
+                    {cancelEvent.notes && (
+                      <span className="ml-1 italic">&ldquo;{cancelEvent.notes}&rdquo;</span>
+                    )}
+                  </p>
+                )}
+
+                {refundEvent && (
+                  <p className="text-xs text-orange-600 dark:text-orange-400">
+                    Refunded by <span className="font-medium">{refundEvent.by}</span> on{" "}
+                    {new Date(refundEvent.at).toLocaleDateString()}.
+                    {refundEvent.notes && (
+                      <span className="ml-1 italic">&ldquo;{refundEvent.notes}&rdquo;</span>
+                    )}
+                  </p>
+                )}
+
+                {editCount > 0 && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    Order was updated {editCount} time{editCount !== 1 ? "s" : ""} by staff.
+                  </p>
+                )}
+              </div>
             </div>
           </td>
         </tr>
@@ -106,9 +151,9 @@ export default function OrdersPage() {
   const { orders } = useStore();
   const user = getStoredUser();
 
-  const [search, setSearch]           = useState("");
+  const [search, setSearch]             = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [dateFilter, setDateFilter]   = useState<DateFilter>("all");
+  const [dateFilter, setDateFilter]     = useState<DateFilter>("all");
 
   const baseOrders =
     user?.role === "requester"
@@ -177,6 +222,8 @@ export default function OrdersPage() {
             <option value="fulfilled">Fulfilled</option>
             <option value="shipped">Shipped</option>
             <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
           </select>
           <ChevronDownSm size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>

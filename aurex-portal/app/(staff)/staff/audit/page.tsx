@@ -12,6 +12,9 @@ const ACTION_LABEL: Record<AuditAction, string> = {
   staff_login:          "Signed In",
   staff_logout:         "Signed Out",
   order_status_changed: "Order Status Changed",
+  order_cancelled:      "Order Cancelled",
+  order_refunded:       "Order Refunded",
+  order_edited:         "Order Edited",
   staff_user_created:   "Staff User Created",
 };
 
@@ -22,6 +25,9 @@ const ACTION_COLOR: Record<AuditAction, string> = {
   staff_login:          "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-gray-400",
   staff_logout:         "bg-gray-100 text-gray-500 dark:bg-white/8 dark:text-gray-500",
   order_status_changed: "bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400",
+  order_cancelled:      "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400",
+  order_refunded:       "bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400",
+  order_edited:         "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400",
   staff_user_created:   "bg-aurex-blue/10 text-aurex-blue dark:bg-aurex-blue/10 dark:text-aurex-blue",
 };
 

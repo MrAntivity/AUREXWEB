@@ -1,16 +1,19 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Search, ChevronDown, ChevronUp, Package,
-  CheckCircle2, Truck, MapPin, User, Clock, X,
+  Search, Package, CheckCircle2, Truck, MapPin, User, Clock, X, MessageSquare,
+  Edit2, Ban, RotateCcw, Minus, Plus,
 } from "lucide-react";
-import type { Order, OrderEvent } from "@/lib/store";
+import type { Order, OrderEvent, CartItem } from "@/lib/store";
 import { ORDERS_KEY } from "@/lib/store";
 import { getStoredStaffUser } from "@/lib/staff-auth";
 import { addAuditEntry } from "@/lib/audit-log";
+import { getUsersFromStore } from "@/lib/mock-auth";
+import { getOrCreateStaffConvo } from "@/lib/messages-store";
 
-type FilterStatus = "all" | "pending" | "approved" | "fulfilled" | "shipped" | "delivered" | "rejected";
+type FilterStatus = "all" | "pending" | "approved" | "fulfilled" | "shipped" | "delivered" | "rejected" | "cancelled" | "refunded";
 
 const statusStyle: Record<string, string> = {
   pending:   "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20",
@@ -19,11 +22,14 @@ const statusStyle: Record<string, string> = {
   fulfilled: "bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20",
   shipped:   "bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-500/10 dark:text-violet-400 dark:ring-violet-500/20",
   delivered: "bg-teal-50 text-teal-700 ring-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:ring-teal-500/20",
+  cancelled: "bg-red-50 text-red-700 ring-red-200 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20",
+  refunded:  "bg-orange-50 text-orange-700 ring-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:ring-orange-500/20",
 };
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending", approved: "Approved", rejected: "Rejected",
   fulfilled: "Fulfilled", shipped: "Shipped", delivered: "Delivered",
+  cancelled: "Cancelled", refunded: "Refunded",
 };
 
 function fmt(iso: string) {
@@ -34,25 +40,42 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-function OrderDetail({ order, onUpdate }: { order: Order; onUpdate: (updated: Order) => void }) {
+type ModalMode = "view" | "edit" | "confirm-cancel" | "confirm-refund";
+
+function OrderModal({ order, onClose, onUpdate }: {
+  order: Order;
+  onClose: () => void;
+  onUpdate: (updated: Order) => void;
+}) {
+  const router = useRouter();
   const [trackingInput, setTrackingInput] = useState(order.trackingCode ?? "");
+  const [mode, setMode] = useState<ModalMode>("view");
+  const [cancelNotes, setCancelNotes] = useState("");
+  const [refundNotes, setRefundNotes] = useState("");
+  const [editItems, setEditItems] = useState<CartItem[]>(order.items);
+
+  const editTotal = editItems.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+
+  function persistUpdate(updated: Order) {
+    try {
+      const raw = localStorage.getItem(ORDERS_KEY);
+      const all: Order[] = raw ? JSON.parse(raw) : [];
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(all.map((o) => (o.id === order.id ? updated : o))));
+    } catch { /* ignore */ }
+    onUpdate(updated);
+  }
 
   function applyUpdate(updates: Partial<Order> & { newEvent: OrderEvent }) {
     const staffUser = getStoredStaffUser();
     if (!staffUser) return;
     const { newEvent, ...rest } = updates;
     const updated: Order = { ...order, ...rest, timeline: [...(order.timeline ?? []), newEvent] };
-    try {
-      const raw = localStorage.getItem(ORDERS_KEY);
-      const all: Order[] = raw ? JSON.parse(raw) : [];
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(all.map((o) => (o.id === order.id ? updated : o))));
-    } catch { /* ignore */ }
     addAuditEntry({
       userName: staffUser.name, userEmail: staffUser.email,
       action: "order_status_changed", target: order.requestNumber,
       details: `${staffUser.name} marked ${order.requestNumber} as ${updates.status ?? newEvent.stage}`,
     });
-    onUpdate(updated);
+    persistUpdate(updated);
   }
 
   function handleFulfill() {
@@ -73,115 +96,451 @@ function OrderDetail({ order, onUpdate }: { order: Order; onUpdate: (updated: Or
     applyUpdate({ status: "delivered", newEvent: { stage: "delivered", by: s.name, at: new Date().toISOString() } });
   }
 
+  function handleCancel() {
+    const s = getStoredStaffUser();
+    if (!s) return;
+    const now = new Date().toISOString();
+    const updated: Order = {
+      ...order,
+      status: "cancelled",
+      timeline: [...(order.timeline ?? []), {
+        stage: "cancelled", by: s.name, at: now,
+        ...(cancelNotes.trim() ? { notes: cancelNotes.trim() } : {}),
+      }],
+    };
+    try {
+      const raw = localStorage.getItem(ORDERS_KEY);
+      const all: Order[] = raw ? JSON.parse(raw) : [];
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(all.map((o) => (o.id === order.id ? updated : o))));
+    } catch { /* ignore */ }
+    addAuditEntry({
+      userName: s.name, userEmail: s.email,
+      action: "order_cancelled", target: order.requestNumber,
+      details: `${s.name} cancelled ${order.requestNumber}${cancelNotes.trim() ? `: ${cancelNotes.trim()}` : ""}`,
+    });
+    setMode("view");
+    setCancelNotes("");
+    onUpdate(updated);
+  }
+
+  function handleRefund() {
+    const s = getStoredStaffUser();
+    if (!s) return;
+    const now = new Date().toISOString();
+    const updated: Order = {
+      ...order,
+      status: "refunded",
+      timeline: [...(order.timeline ?? []), {
+        stage: "refunded", by: s.name, at: now,
+        ...(refundNotes.trim() ? { notes: refundNotes.trim() } : {}),
+      }],
+    };
+    try {
+      const raw = localStorage.getItem(ORDERS_KEY);
+      const all: Order[] = raw ? JSON.parse(raw) : [];
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(all.map((o) => (o.id === order.id ? updated : o))));
+    } catch { /* ignore */ }
+    addAuditEntry({
+      userName: s.name, userEmail: s.email,
+      action: "order_refunded", target: order.requestNumber,
+      details: `${s.name} refunded ${order.requestNumber}${refundNotes.trim() ? `: ${refundNotes.trim()}` : ""}`,
+    });
+    setMode("view");
+    setRefundNotes("");
+    onUpdate(updated);
+  }
+
+  function handleSaveEdit() {
+    const s = getStoredStaffUser();
+    if (!s || editItems.length === 0) return;
+    const now = new Date().toISOString();
+    const newTotal = editItems.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+    const updated: Order = {
+      ...order,
+      items: editItems,
+      total: newTotal,
+      timeline: [...(order.timeline ?? []), { stage: "edited", by: s.name, at: now, notes: "Order items updated by staff" }],
+    };
+    try {
+      const raw = localStorage.getItem(ORDERS_KEY);
+      const all: Order[] = raw ? JSON.parse(raw) : [];
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(all.map((o) => (o.id === order.id ? updated : o))));
+    } catch { /* ignore */ }
+    addAuditEntry({
+      userName: s.name, userEmail: s.email,
+      action: "order_edited", target: order.requestNumber,
+      details: `${s.name} edited items in ${order.requestNumber} (new total: $${newTotal.toFixed(2)})`,
+    });
+    setMode("view");
+    onUpdate(updated);
+  }
+
+  function handleMessageDeptAdmin() {
+    const store = getUsersFromStore();
+    const deptAdmin = Object.values(store).find(
+      (u) =>
+        u.role === "department_admin" &&
+        u.department === order.requester.department &&
+        u.institutionId === order.institutionId &&
+        u.status !== "deleted",
+    );
+    const targetEmail = deptAdmin?.email ?? order.requester.email;
+    const convo = getOrCreateStaffConvo(targetEmail, order.institutionId);
+    router.push(`/staff/messages?convo=${convo.id}`);
+    onClose();
+  }
+
+  const canCancel = ["pending", "approved", "fulfilled", "shipped"].includes(order.status);
+  const canRefund = order.status === "delivered";
+  const canEdit = ["pending", "approved", "fulfilled"].includes(order.status);
+
   const timeline = order.timeline ?? [];
 
   return (
-    <div className="space-y-5 bg-gray-50/60 px-6 py-5 dark:bg-white/3">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          { Icon: User,    label: "Requester",  main: order.requester.name,            sub: order.requester.email },
-          { Icon: Package, label: "Department", main: order.requester.department ?? "—", sub: null },
-          { Icon: MapPin,  label: "Location",   main: order.requester.location ?? "—",  sub: null },
-          { Icon: Clock,   label: "Submitted",  main: fmtDate(order.submittedAt),       sub: null },
-        ].map(({ Icon, label, main, sub }) => (
-          <div key={label} className="flex items-start gap-2">
-            <Icon size={13} className="mt-0.5 shrink-0 text-gray-400" />
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">{label}</p>
-              <p className="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">{main}</p>
-              {sub && <p className="text-xs text-gray-400">{sub}</p>}
-            </div>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="my-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#14141f]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal header */}
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-white/8">
+          <div>
+            <h2 className="font-semibold text-gray-900 dark:text-white">Order {order.requestNumber}</h2>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{fmtDate(order.submittedAt)}</p>
           </div>
-        ))}
-      </div>
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyle[order.status] ?? ""}`}>
+              {STATUS_LABELS[order.status] ?? order.status}
+            </span>
+            {mode === "view" && (
+              <>
+                {canEdit && (
+                  <button
+                    onClick={() => { setEditItems(order.items); setMode("edit"); }}
+                    title="Edit order items"
+                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
+                  >
+                    <Edit2 size={12} /> Edit Items
+                  </button>
+                )}
+                <button
+                  onClick={handleMessageDeptAdmin}
+                  title="Open a message thread with the department admin for this order"
+                  className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
+                >
+                  <MessageSquare size={12} /> Message Dept Admin
+                </button>
+              </>
+            )}
+            {mode !== "view" && (
+              <button
+                onClick={() => setMode("view")}
+                className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-400 dark:hover:bg-white/5"
+              >
+                <X size={12} /> Discard
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/8"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
 
-      <div>
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Order Items</p>
-        <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-white dark:divide-white/5 dark:border-white/8 dark:bg-[#1a1a2a]">
-          {order.items.map((item) => (
-            <div key={item.product.sku} className="flex items-center justify-between px-4 py-2.5">
+        {/* Modal body */}
+        <div className="max-h-[70vh] overflow-y-auto">
+          <div className="space-y-5 px-6 py-5">
+
+            {/* Requester info grid */}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {[
+                { Icon: User,    label: "Requester",  main: order.requester.name,              sub: order.requester.email },
+                { Icon: Package, label: "Department", main: order.requester.department ?? "—", sub: null },
+                { Icon: MapPin,  label: "Location",   main: order.requester.location ?? "—",   sub: null },
+                { Icon: Clock,   label: "Submitted",  main: fmtDate(order.submittedAt),         sub: null },
+              ].map(({ Icon, label, main, sub }) => (
+                <div key={label} className="flex items-start gap-2">
+                  <Icon size={13} className="mt-0.5 shrink-0 text-gray-400" />
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">{label}</p>
+                    <p className="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">{main}</p>
+                    {sub && <p className="text-xs text-gray-400">{sub}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Edit mode: editable items */}
+            {mode === "edit" && (
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{item.product.name}</p>
-                <p className="text-xs text-gray-400">{item.product.sku} · {item.product.unit}</p>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Edit Items</p>
+                <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-gray-50/60 dark:divide-white/5 dark:border-white/8 dark:bg-white/3">
+                  {editItems.map((item, idx) => (
+                    <div key={item.product.sku} className="flex items-center justify-between px-4 py-2.5 gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.product.name}</p>
+                        <p className="text-xs text-gray-400">{item.product.sku} · ${item.product.price.toFixed(2)}/{item.product.unit}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            if (item.qty <= 1) return;
+                            setEditItems((prev) => prev.map((i, j) => j === idx ? { ...i, qty: i.qty - 1 } : i));
+                          }}
+                          className="rounded-md border border-gray-200 p-1 text-gray-400 hover:bg-gray-100 disabled:opacity-30 dark:border-white/10 dark:hover:bg-white/8"
+                          disabled={item.qty <= 1}
+                        >
+                          <Minus size={11} />
+                        </button>
+                        <input
+                          type="number"
+                          min={1}
+                          value={item.qty}
+                          onChange={(e) => {
+                            const v = Math.max(1, parseInt(e.target.value) || 1);
+                            setEditItems((prev) => prev.map((i, j) => j === idx ? { ...i, qty: v } : i));
+                          }}
+                          className="w-14 rounded-lg border border-gray-200 bg-white px-2 py-1 text-center text-xs text-gray-900 focus:border-aurex-blue focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"
+                        />
+                        <button
+                          onClick={() => setEditItems((prev) => prev.map((i, j) => j === idx ? { ...i, qty: i.qty + 1 } : i))}
+                          className="rounded-md border border-gray-200 p-1 text-gray-400 hover:bg-gray-100 dark:border-white/10 dark:hover:bg-white/8"
+                        >
+                          <Plus size={11} />
+                        </button>
+                        <p className="w-16 text-right text-sm font-semibold text-gray-900 dark:text-white">
+                          ${(item.product.price * item.qty).toFixed(2)}
+                        </p>
+                        <button
+                          onClick={() => setEditItems((prev) => prev.filter((_, j) => j !== idx))}
+                          disabled={editItems.length <= 1}
+                          title="Remove item"
+                          className="rounded-md p-1 text-gray-300 hover:bg-red-50 hover:text-red-500 disabled:opacity-20 dark:text-gray-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between px-4 py-2.5">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">New Total</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">${editTotal.toFixed(2)}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <button
+                    onClick={handleSaveEdit}
+                    disabled={editItems.length === 0}
+                    className="rounded-lg bg-aurex-blue px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-aurex-blue-light disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={() => setMode("view")}
+                    className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
+                  >
+                    Discard
+                  </button>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">${(item.product.price * item.qty).toFixed(2)}</p>
-                <p className="text-xs text-gray-400">Qty {item.qty} × ${item.product.price.toFixed(2)}</p>
+            )}
+
+            {/* View mode: order items (read-only) */}
+            {mode !== "edit" && (
+              <div>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Order Items</p>
+                <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-gray-50/60 dark:divide-white/5 dark:border-white/8 dark:bg-white/3">
+                  {order.items.map((item) => (
+                    <div key={item.product.sku} className="flex items-center justify-between px-4 py-2.5">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{item.product.name}</p>
+                        <p className="text-xs text-gray-400">{item.product.sku} · {item.product.unit}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">${(item.product.price * item.qty).toFixed(2)}</p>
+                        <p className="text-xs text-gray-400">Qty {item.qty} × ${item.product.price.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between px-4 py-2.5">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Total</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">${order.total.toFixed(2)}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )}
+
+            {/* View mode: action banners */}
+            {mode === "view" && (
+              <>
+                {order.status === "approved" && (
+                  <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3 dark:border-blue-500/20 dark:bg-blue-500/10">
+                    <CheckCircle2 size={14} className="shrink-0 text-blue-500" />
+                    <p className="flex-1 text-xs text-blue-700 dark:text-blue-300">Order approved. Mark as fulfilled once items are prepared.</p>
+                    <button onClick={handleFulfill} className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-700">
+                      Mark Fulfilled
+                    </button>
+                  </div>
+                )}
+
+                {order.status === "fulfilled" && (
+                  <div className="flex items-center gap-3 rounded-xl border border-violet-100 bg-violet-50/60 px-4 py-3 dark:border-violet-500/20 dark:bg-violet-500/10">
+                    <Truck size={14} className="shrink-0 text-violet-500" />
+                    <div className="flex flex-1 items-center gap-2">
+                      <p className="shrink-0 text-xs text-violet-700 dark:text-violet-300">Tracking:</p>
+                      <input
+                        type="text"
+                        value={trackingInput}
+                        onChange={(e) => setTrackingInput(e.target.value)}
+                        placeholder="e.g. 1Z999AA10123456784"
+                        className="flex-1 rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-xs text-gray-900 placeholder-gray-400 focus:border-violet-400 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"
+                      />
+                    </div>
+                    <button
+                      onClick={handleShip}
+                      disabled={!trackingInput.trim()}
+                      className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Mark Shipped
+                    </button>
+                  </div>
+                )}
+
+                {order.status === "shipped" && (
+                  <div className="flex items-center gap-3 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3 dark:border-teal-500/20 dark:bg-teal-500/10">
+                    <Truck size={14} className="shrink-0 text-teal-500" />
+                    <p className="flex-1 text-xs text-teal-700 dark:text-teal-300">
+                      Shipped — tracking <span className="font-mono font-semibold">{order.trackingCode}</span>. Mark delivered once confirmed.
+                    </p>
+                    <button onClick={handleDeliver} className="rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700">
+                      Mark Delivered
+                    </button>
+                  </div>
+                )}
+
+                {order.status === "delivered" && (
+                  <div className="flex items-center gap-2 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3 dark:border-teal-500/20 dark:bg-teal-500/10">
+                    <CheckCircle2 size={14} className="text-teal-600 dark:text-teal-400" />
+                    <p className="text-xs font-medium text-teal-700 dark:text-teal-300">Order delivered.</p>
+                    {order.trackingCode && <span className="font-mono text-xs text-teal-600 dark:text-teal-400">{order.trackingCode}</span>}
+                  </div>
+                )}
+
+                {order.status === "cancelled" && (
+                  <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50/60 px-4 py-3 dark:border-red-500/20 dark:bg-red-500/10">
+                    <Ban size={14} className="text-red-500 dark:text-red-400" />
+                    <p className="text-xs font-medium text-red-700 dark:text-red-300">Order cancelled.</p>
+                  </div>
+                )}
+
+                {order.status === "refunded" && (
+                  <div className="flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50/60 px-4 py-3 dark:border-orange-500/20 dark:bg-orange-500/10">
+                    <RotateCcw size={14} className="text-orange-500 dark:text-orange-400" />
+                    <p className="text-xs font-medium text-orange-700 dark:text-orange-300">Order refunded.</p>
+                  </div>
+                )}
+
+                {/* Cancel / Refund action row */}
+                {(canCancel || canRefund) && (
+                  <div className="flex items-center gap-2 border-t border-gray-100 pt-4 dark:border-white/8">
+                    {canCancel && (
+                      <button
+                        onClick={() => setMode("confirm-cancel")}
+                        className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                      >
+                        <Ban size={12} /> Cancel Order
+                      </button>
+                    )}
+                    {canRefund && (
+                      <button
+                        onClick={() => setMode("confirm-refund")}
+                        className="flex items-center gap-1.5 rounded-lg border border-orange-200 px-3 py-2 text-xs font-medium text-orange-600 transition hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-500/10"
+                      >
+                        <RotateCcw size={12} /> Issue Refund
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Cancel confirmation */}
+            {mode === "confirm-cancel" && (
+              <div className="rounded-xl border border-red-200 bg-red-50/60 p-4 dark:border-red-500/20 dark:bg-red-500/10">
+                <p className="mb-2 text-sm font-semibold text-red-800 dark:text-red-300">Cancel this order?</p>
+                <p className="mb-3 text-xs text-red-600 dark:text-red-400">This will mark the order as cancelled and notify the requester.</p>
+                <textarea
+                  value={cancelNotes}
+                  onChange={(e) => setCancelNotes(e.target.value)}
+                  placeholder="Reason for cancellation (optional)"
+                  rows={2}
+                  className="mb-3 w-full resize-none rounded-lg border border-red-200 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 focus:border-red-400 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"
+                />
+                <div className="flex gap-2">
+                  <button onClick={handleCancel} className="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-red-700">
+                    Confirm Cancellation
+                  </button>
+                  <button
+                    onClick={() => { setMode("view"); setCancelNotes(""); }}
+                    className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
+                  >
+                    Go Back
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Refund confirmation */}
+            {mode === "confirm-refund" && (
+              <div className="rounded-xl border border-orange-200 bg-orange-50/60 p-4 dark:border-orange-500/20 dark:bg-orange-500/10">
+                <p className="mb-2 text-sm font-semibold text-orange-800 dark:text-orange-300">Issue a refund for this order?</p>
+                <p className="mb-3 text-xs text-orange-600 dark:text-orange-400">This will mark the order as refunded (${order.total.toFixed(2)}).</p>
+                <textarea
+                  value={refundNotes}
+                  onChange={(e) => setRefundNotes(e.target.value)}
+                  placeholder="Reason for refund (optional)"
+                  rows={2}
+                  className="mb-3 w-full resize-none rounded-lg border border-orange-200 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"
+                />
+                <div className="flex gap-2">
+                  <button onClick={handleRefund} className="rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-orange-700">
+                    Confirm Refund
+                  </button>
+                  <button
+                    onClick={() => { setMode("view"); setRefundNotes(""); }}
+                    className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
+                  >
+                    Go Back
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Timeline */}
+            {timeline.length > 0 && mode === "view" && (
+              <div>
+                <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Timeline</p>
+                <div className="space-y-2">
+                  {[...timeline].reverse().map((event, i) => (
+                    <div key={i} className="flex items-center gap-2.5 text-xs">
+                      <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
+                      <span className="font-semibold capitalize text-gray-700 dark:text-gray-300">{event.stage}</span>
+                      <span className="text-gray-400">by {event.by}</span>
+                      {event.notes && <span className="italic text-gray-400">&ldquo;{event.notes}&rdquo;</span>}
+                      <span className="ml-auto shrink-0 text-gray-400">{fmt(event.at)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {order.status === "approved" && (
-        <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3 dark:border-blue-500/20 dark:bg-blue-500/10">
-          <CheckCircle2 size={14} className="shrink-0 text-blue-500" />
-          <p className="flex-1 text-xs text-blue-700 dark:text-blue-300">Order approved. Mark as fulfilled once items are prepared.</p>
-          <button onClick={handleFulfill} className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-700">
-            Mark Fulfilled
-          </button>
-        </div>
-      )}
-
-      {order.status === "fulfilled" && (
-        <div className="flex items-center gap-3 rounded-xl border border-violet-100 bg-violet-50/60 px-4 py-3 dark:border-violet-500/20 dark:bg-violet-500/10">
-          <Truck size={14} className="shrink-0 text-violet-500" />
-          <div className="flex flex-1 items-center gap-2">
-            <p className="shrink-0 text-xs text-violet-700 dark:text-violet-300">Tracking:</p>
-            <input
-              type="text"
-              value={trackingInput}
-              onChange={(e) => setTrackingInput(e.target.value)}
-              placeholder="e.g. 1Z999AA10123456784"
-              className="flex-1 rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-xs text-gray-900 placeholder-gray-400 focus:border-violet-400 focus:outline-none dark:border-white/10 dark:bg-[#1a1a2a] dark:text-white"
-            />
-          </div>
-          <button
-            onClick={handleShip}
-            disabled={!trackingInput.trim()}
-            className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Mark Shipped
-          </button>
-        </div>
-      )}
-
-      {order.status === "shipped" && (
-        <div className="flex items-center gap-3 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3 dark:border-teal-500/20 dark:bg-teal-500/10">
-          <Truck size={14} className="shrink-0 text-teal-500" />
-          <p className="flex-1 text-xs text-teal-700 dark:text-teal-300">
-            Shipped — tracking <span className="font-mono font-semibold">{order.trackingCode}</span>. Mark delivered once confirmed.
-          </p>
-          <button onClick={handleDeliver} className="rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700">
-            Mark Delivered
-          </button>
-        </div>
-      )}
-
-      {order.status === "delivered" && (
-        <div className="flex items-center gap-2 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3 dark:border-teal-500/20 dark:bg-teal-500/10">
-          <CheckCircle2 size={14} className="text-teal-600 dark:text-teal-400" />
-          <p className="text-xs font-medium text-teal-700 dark:text-teal-300">Order delivered.</p>
-          {order.trackingCode && <span className="font-mono text-xs text-teal-600 dark:text-teal-400">{order.trackingCode}</span>}
-        </div>
-      )}
-
-      {timeline.length > 0 && (
-        <div>
-          <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Timeline</p>
-          <div className="space-y-2">
-            {[...timeline].reverse().map((event, i) => (
-              <div key={i} className="flex items-center gap-2.5 text-xs">
-                <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
-                <span className="font-semibold capitalize text-gray-700 dark:text-gray-300">{event.stage}</span>
-                <span className="text-gray-400">by {event.by}</span>
-                {event.notes && <span className="italic text-gray-400">&ldquo;{event.notes}&rdquo;</span>}
-                <span className="ml-auto shrink-0 text-gray-400">{fmt(event.at)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -190,7 +549,7 @@ export default function StaffOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [modalOrder, setModalOrder] = useState<Order | null>(null);
 
   const loadOrders = useCallback(() => {
     try {
@@ -203,6 +562,7 @@ export default function StaffOrdersPage() {
 
   function handleOrderUpdate(updated: Order) {
     setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+    setModalOrder(updated);
   }
 
   const filtered = useMemo(() => {
@@ -226,6 +586,7 @@ export default function StaffOrdersPage() {
     { key: "fulfilled", label: "Fulfilled", light: "text-blue-600 bg-blue-50",     dark: "dark:text-blue-400 dark:bg-blue-500/10" },
     { key: "shipped",   label: "Shipped",   light: "text-violet-600 bg-violet-50", dark: "dark:text-violet-400 dark:bg-violet-500/10" },
     { key: "delivered", label: "Delivered", light: "text-teal-600 bg-teal-50",     dark: "dark:text-teal-400 dark:bg-teal-500/10" },
+    { key: "cancelled", label: "Cancelled", light: "text-red-600 bg-red-50",       dark: "dark:text-red-400 dark:bg-red-500/10" },
   ] as const;
 
   return (
@@ -235,7 +596,7 @@ export default function StaffOrdersPage() {
         <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{orders.length} total orders from the user portal</p>
       </div>
 
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
         {statCards.map(({ key, label, light, dark }) => (
           <button
             key={key}
@@ -271,6 +632,8 @@ export default function StaffOrdersPage() {
           <option value="shipped">Shipped</option>
           <option value="delivered">Delivered</option>
           <option value="rejected">Rejected</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="refunded">Refunded</option>
         </select>
         {(search || filterStatus !== "all") && (
           <button
@@ -294,61 +657,52 @@ export default function StaffOrdersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 dark:border-white/8 dark:bg-white/3">
-                  {["Request ID", "Requester", "Location", "Items", "Total", "Status", "Date", ""].map((h) => (
+                  {["Request ID", "Requester", "Location", "Items", "Total", "Status", "Date"].map((h) => (
                     <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold text-gray-400 dark:text-gray-500">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                 {filtered.map((o) => (
-                  <>
-                    <tr
-                      key={o.id}
-                      className="group cursor-pointer transition-colors hover:bg-gray-50/50 dark:hover:bg-white/3"
-                      onClick={() => setExpanded(expanded === o.id ? null : o.id)}
-                    >
-                      <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{o.requestNumber}</td>
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-gray-900 dark:text-white">{o.requester.name}</p>
-                        <p className="text-xs text-gray-400">{o.requester.email}</p>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{o.requester.location ?? o.requester.department ?? "—"}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                        {o.items[0]?.product.name}
-                        {o.items.length > 1 && <span className="ml-1 text-gray-400">+{o.items.length - 1}</span>}
-                      </td>
-                      <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">${o.total.toFixed(2)}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyle[o.status] ?? ""}`}>
-                          {STATUS_LABELS[o.status] ?? o.status}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-xs text-gray-400">{fmtDate(o.submittedAt)}</td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setExpanded(expanded === o.id ? null : o.id); }}
-                          className="rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        >
-                          {expanded === o.id ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                        </button>
-                      </td>
-                    </tr>
-                    {expanded === o.id && (
-                      <tr key={`${o.id}-detail`}>
-                        <td colSpan={8} className="p-0">
-                          <OrderDetail order={o} onUpdate={handleOrderUpdate} />
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                  <tr
+                    key={o.id}
+                    className="cursor-pointer transition-colors hover:bg-gray-50/80 dark:hover:bg-white/4"
+                    onClick={() => setModalOrder(o)}
+                  >
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{o.requestNumber}</td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-gray-900 dark:text-white">{o.requester.name}</p>
+                      <p className="text-xs text-gray-400">{o.requester.email}</p>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{o.requester.location ?? o.requester.department ?? "—"}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                      {o.items[0]?.product.name}
+                      {o.items.length > 1 && <span className="ml-1 text-gray-400">+{o.items.length - 1}</span>}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">${o.total.toFixed(2)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyle[o.status] ?? ""}`}>
+                        {STATUS_LABELS[o.status] ?? o.status}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-xs text-gray-400">{fmtDate(o.submittedAt)}</td>
+                  </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={8} className="py-10 text-center text-sm text-gray-400">No orders match your filters.</td></tr>
+                  <tr><td colSpan={7} className="py-10 text-center text-sm text-gray-400">No orders match your filters.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
+      )}
+
+      {modalOrder && (
+        <OrderModal
+          order={modalOrder}
+          onClose={() => setModalOrder(null)}
+          onUpdate={handleOrderUpdate}
+        />
       )}
     </div>
   );

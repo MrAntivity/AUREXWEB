@@ -5,6 +5,7 @@ import type { CartItem, Order, OrderStatus, OrderEvent } from "@/lib/store";
 import { CART_KEY, SAVED_KEY, ORDERS_KEY, COUNTER_KEY } from "@/lib/store";
 import type { MockUser } from "@/lib/mock-auth";
 import type { Product } from "@/lib/products";
+import { addNotification } from "@/lib/notifications";
 
 type StoreContextValue = {
   cart: CartItem[];
@@ -23,6 +24,7 @@ type StoreContextValue = {
   submitOrder: (requester: Pick<MockUser, "name" | "email" | "department" | "role"> & { location?: string }) => Order;
   approveOrder: (orderId: string, reviewerName: string, notes?: string) => void;
   rejectOrder: (orderId: string, reviewerName: string, notes?: string) => void;
+  editAndResubmit: (orderId: string, newItems: CartItem[], requesterName: string) => void;
   clearOrders: () => void;
   cartTotal: number;
   cartCount: number;
@@ -58,7 +60,6 @@ export function StoreProvider({
 }) {
   const cartKey = `${CART_KEY}_${userEmail}`;
   const savedKey = `${SAVED_KEY}_${userEmail}`;
-  const ordersKey = `${ORDERS_KEY}_${institutionId}`;
   const counterKey = `${COUNTER_KEY}_${institutionId}`;
 
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -70,9 +71,10 @@ export function StoreProvider({
   useEffect(() => {
     setCart(load<CartItem[]>(cartKey, []));
     setSavedItems(load<CartItem[]>(savedKey, []));
-    setOrders(load<Order[]>(ordersKey, []));
+    const allOrders = load<Order[]>(ORDERS_KEY, []);
+    setOrders(allOrders.filter((o) => o.institutionId === institutionId));
     setHydrated(true);
-  }, [cartKey, savedKey, ordersKey]);
+  }, [cartKey, savedKey, institutionId]);
 
   useEffect(() => {
     if (hydrated) save(cartKey, cart);
@@ -83,8 +85,23 @@ export function StoreProvider({
   }, [savedItems, hydrated, savedKey]);
 
   useEffect(() => {
-    if (hydrated) save(ordersKey, orders);
-  }, [orders, hydrated, ordersKey]);
+    if (!hydrated) return;
+    const allOrders = load<Order[]>(ORDERS_KEY, []);
+    const others = allOrders.filter((o) => o.institutionId !== institutionId);
+    save(ORDERS_KEY, [...others, ...orders]);
+  }, [orders, hydrated, institutionId]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    function handleStorage(e: StorageEvent) {
+      if (e.key === ORDERS_KEY) {
+        const allOrders = load<Order[]>(ORDERS_KEY, []);
+        setOrders(allOrders.filter((o) => o.institutionId === institutionId));
+      }
+    }
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [hydrated, institutionId]);
 
   const addToCart = useCallback((product: Product) => {
     setCart((prev) => {
@@ -195,8 +212,19 @@ export function StoreProvider({
   const approveOrder = useCallback((orderId: string, reviewerName: string, notes?: string) => {
     const now = new Date().toISOString();
     const event: OrderEvent = { stage: "approved", by: reviewerName, at: now, ...(notes ? { notes } : {}) };
-    setOrders((prev) =>
-      prev.map((o) =>
+    setOrders((prev) => {
+      const target = prev.find((o) => o.id === orderId);
+      if (target) {
+        addNotification(target.requester.email, {
+          orderId,
+          orderNumber: target.requestNumber,
+          type: "approved",
+          byName: reviewerName,
+          ...(notes ? { reason: notes } : {}),
+          at: now,
+        });
+      }
+      return prev.map((o) =>
         o.id === orderId
           ? {
               ...o,
@@ -207,15 +235,26 @@ export function StoreProvider({
               timeline: [...(o.timeline ?? []), event],
             }
           : o
-      )
-    );
+      );
+    });
   }, []);
 
   const rejectOrder = useCallback((orderId: string, reviewerName: string, notes?: string) => {
     const now = new Date().toISOString();
     const event: OrderEvent = { stage: "rejected", by: reviewerName, at: now, ...(notes ? { notes } : {}) };
-    setOrders((prev) =>
-      prev.map((o) =>
+    setOrders((prev) => {
+      const target = prev.find((o) => o.id === orderId);
+      if (target) {
+        addNotification(target.requester.email, {
+          orderId,
+          orderNumber: target.requestNumber,
+          type: "rejected",
+          byName: reviewerName,
+          ...(notes ? { reason: notes } : {}),
+          at: now,
+        });
+      }
+      return prev.map((o) =>
         o.id === orderId
           ? {
               ...o,
@@ -226,7 +265,29 @@ export function StoreProvider({
               timeline: [...(o.timeline ?? []), event],
             }
           : o
-      )
+      );
+    });
+  }, []);
+
+  const editAndResubmit = useCallback((orderId: string, newItems: CartItem[], requesterName: string) => {
+    const now = new Date().toISOString();
+    const newTotal = newItems.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+    setOrders((prev) =>
+      prev.map((o) => {
+        if (o.id !== orderId) return o;
+        const { reviewedBy: _rb, reviewedAt: _ra, reviewNotes: _rn, ...rest } = o;
+        return {
+          ...rest,
+          items: newItems,
+          total: newTotal,
+          status: "pending" as OrderStatus,
+          timeline: [
+            ...(o.timeline ?? []),
+            { stage: "edited" as const, by: requesterName, at: now, notes: "Edited and resubmitted after rejection" },
+            { stage: "requested" as const, by: requesterName, at: now },
+          ],
+        };
+      })
     );
   }, []);
 
@@ -254,6 +315,7 @@ export function StoreProvider({
         submitOrder,
         approveOrder,
         rejectOrder,
+        editAndResubmit,
         clearOrders,
         cartTotal,
         cartCount,
