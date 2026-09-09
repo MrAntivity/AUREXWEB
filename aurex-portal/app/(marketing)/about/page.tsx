@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Target, Lightbulb, Heart } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -161,9 +162,9 @@ export default function AboutPage() {
             <a href="mailto:hello@aurexmedical.com" className="btn-primary px-6 py-3">
               Get in touch
             </a>
-            <a href="/quote" className="btn-secondary px-6 py-3">
+            <Link href="/quote" className="btn-secondary px-6 py-3">
               Request a Demo
-            </a>
+            </Link>
           </div>
         </div>
       </section>

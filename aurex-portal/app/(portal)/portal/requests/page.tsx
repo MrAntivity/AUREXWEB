@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import {
   CheckCircle2, XCircle, Clock, Package, Truck, Ban, RotateCcw,
   Edit3, X, Minus, Plus, RotateCw, ChevronDown, ChevronRight,
@@ -341,9 +342,9 @@ export default function MyRequestsPage() {
         {myOrders.length === 0 ? (
           <div className="flex h-40 flex-col items-center justify-center gap-2 text-sm text-gray-400">
             <p>No requests yet.</p>
-            <a href="/portal/catalog" className="text-aurex-blue hover:underline">
+            <Link href="/portal/catalog" className="text-aurex-blue hover:underline">
               Browse the catalog to get started →
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">

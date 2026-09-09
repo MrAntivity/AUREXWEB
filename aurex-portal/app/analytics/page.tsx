@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   TrendingUp, DollarSign, ShoppingCart, CheckCircle2,
   Sun, Moon, X, Calendar, FlaskConical, LayoutGrid, Layers,
@@ -348,13 +349,13 @@ export default function AnalyticsStandalonePage() {
           </button>
 
           {/* Back to portal */}
-          <a
+          <Link
             href="/portal/dashboard"
             className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:opacity-80"
             style={{ borderColor: t.border, color: t.subtext, background: t.cardBg }}
           >
             ← Portal
-          </a>
+          </Link>
         </div>
 
         {/* Filters sub-bar */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { ChevronDown, ChevronRight, Clock, CheckCircle2, XCircle, Package, Truck, Search, X, ChevronDown as ChevronDownSm, Ban, RotateCcw } from "lucide-react";
 import { useStore } from "@/components/portal/StoreProvider";
 import { getStoredUser } from "@/lib/mock-auth";
@@ -255,9 +256,9 @@ export default function OrdersPage() {
         {baseOrders.length === 0 ? (
           <div className="flex h-40 flex-col items-center justify-center gap-2 text-sm text-gray-400">
             <p>No orders yet.</p>
-            <a href="/portal/catalog" className="text-aurex-blue hover:underline">
+            <Link href="/portal/catalog" className="text-aurex-blue hover:underline">
               Browse the catalog to get started →
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">

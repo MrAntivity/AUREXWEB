@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Truck, Package, XCircle, RefreshCw } from "lucide-react";
 import type { Order } from "@/lib/store";
 import { ORDERS_KEY } from "@/lib/store";
@@ -225,9 +226,9 @@ export default function TrackingPage() {
         <div className="card flex flex-col items-center gap-3 py-16">
           <Package size={36} className="text-gray-200 dark:text-white/10" />
           <p className="text-sm text-gray-400">No orders to track yet.</p>
-          <a href="/portal/catalog" className="text-xs text-aurex-blue hover:underline">
+          <Link href="/portal/catalog" className="text-xs text-aurex-blue hover:underline">
             Browse the catalog to get started →
-          </a>
+          </Link>
         </div>
       ) : (
         <>

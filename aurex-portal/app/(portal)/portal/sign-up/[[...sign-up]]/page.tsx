@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { FlaskConical, Mail } from "lucide-react";
 
+export function generateStaticParams() {
+  return [{ "sign-up": [] }];
+}
+
 export default function SignUpPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
